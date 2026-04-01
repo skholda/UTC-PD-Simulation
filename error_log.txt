@@ -1,0 +1,7 @@
+﻿python : Python 
+At line:1 char:120
++ ... P_resistance\Code\Python\pythonProject3'; python main.py 2>&1 | Out-F ...
++                                               ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Python :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
