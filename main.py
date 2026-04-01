@@ -99,6 +99,43 @@ def get_bw(f, w, Rs, Cj, Rp):
     return f'{f[idx[0]]/1e9:.1f}' if len(idx) else '>50'
 
 # ═══════════════════════════════════════════════════════════════════════
+# 4b. 1 dB COMPRESSION PHOTOCURRENT  (I_max)
+# ═══════════════════════════════════════════════════════════════════════
+q_e       = 1.602e-19               # C
+eps_0_si  = 8.854e-12               # F/m
+eps_r_InP = 12.5
+eps_InP   = eps_r_InP * eps_0_si    # F/m
+
+v_os_InP_sat = 4e7 * 1e-2           # m/s  InP overshoot velocity (for I_max)
+E_crit_InP   = 5e3 * 1e2            # V/m  critical field (5 kV/cm)
+
+N_cliff_cm3 = 1.9e17                # cm⁻³
+N_DC_cm3    = (1.5e16 + 1.2e16) / 2 # cm⁻³  averaged
+N_DC_m3     = N_DC_cm3 * 1e6        # m⁻³
+
+W_grade   = (15 + 15) * 1e-9        # m  grading layers
+W_C_eff   = W_cliff + W_C           # m  effective collector = 790 nm
+
+A_dev     = np.pi * (15e-6)**2       # m²  (30 µm diameter)
+V_bi      = 0.9                      # V
+m_mod     = 1.0                      # modulation index
+
+dV_cliff  = q_e * N_cliff_cm3*1e6 * W_cliff**2 / (2*eps_InP)   # V
+
+# K  [A/V]
+K_sat = (2 * eps_InP * v_os_InP_sat / W_C_eff**2) * A_dev
+
+# C_fix  [V]
+C_fix = V_bi + dV_cliff - E_crit_InP * W_C_eff + q_e * N_DC_m3 * W_C**2 / (2*eps_InP)
+
+def I_max_compression(w, Rs, Cj, Rp):
+    """1 dB compression photocurrent I_max(ω) [A]."""
+    Re  = R_eff(Rp)
+    Z_ext = Rs + Re
+    alpha = Z_ext * (1 + m_mod / np.sqrt(1 + (w * Cj * Z_ext)**2))
+    return K_sat * (np.abs(-7.0) + C_fix) / (1 + K_sat * alpha / (1 + m_mod))
+
+# ═══════════════════════════════════════════════════════════════════════
 # 5. HARDCODED MEASUREMENT DATA
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -671,6 +708,22 @@ for cfg in configs:
                 'fm':fm,'pm':pm,'Hd_m':Hd_m,'rms_g':rms_g,'rms_H':rms_H,
                 'Hd_plt':Hd_plt,'bw':bw})
 
+# ── 1 dB compression current vs frequency ────────────────────────────
+print()
+print(f'{"Device":>8}  {"I_max@10GHz(mA)":>16}  {"I_max@30GHz(mA)":>16}')
+print('─'*46)
+for cfg in configs:
+    Rp = cfg['Rp']
+    Imax_plot = I_max_compression(w_plot, Rs_all, Cj_fixed, Rp)
+    cfg['Imax_plot'] = Imax_plot
+    i10 = I_max_compression(2*np.pi*10e9, Rs_all, Cj_fixed, Rp)
+    i30 = I_max_compression(2*np.pi*30e9, Rs_all, Cj_fixed, Rp)
+    Rp_str = 'inf' if np.isinf(Rp) else str(int(Rp))
+    print(f'{Rp_str:>8}  {i10*1e3:>16.2f}  {i30*1e3:>16.2f}')
+
+print()
+print(f'  K = {K_sat*1e3:.4f} mA/V  |  C_fix = {C_fix:.4f} V  |  ΔV_cliff = {dV_cliff*1e3:.2f} mV')
+
 # ═══════════════════════════════════════════════════════════════════════
 # 8. PLOTTING
 # ═══════════════════════════════════════════════════════════════════════
@@ -780,4 +833,25 @@ ax.legend(fontsize=9, loc='lower left')
 fig3.tight_layout()
 fig3.savefig('UTC_PD_PRL.png', dpi=150, bbox_inches='tight')
 
-print('\nSaved: UTC_PD_S11.png, UTC_PD_FreqResp.png, UTC_PD_PRL.png')
+# ── Fig 4: I_max (1 dB compression) vs Frequency ─────────────────────
+fig4, ax4 = plt.subplots(figsize=(10, 5.5))
+ax4.grid(True, alpha=0.3)
+ax4.set_xlabel('Frequency (GHz)', fontsize=11)
+ax4.set_ylabel('$I_{max}$ (mA)', fontsize=11)
+ax4.set_xlim([0, 50])
+ax4.set_title('1 dB Compression Photocurrent vs Frequency | 30μm, $V_{bias}$=−7V',
+              fontweight='bold')
+
+for cfg in configs:
+    Rp = cfg['Rp']; col = cfg['col']; lbl = cfg['lbl']
+    ls = '--' if np.isinf(Rp) else '-'
+    Re = R_eff(Rp)
+    Z_ext_val = Rs_all + Re
+    ax4.plot(f_plot/1e9, cfg['Imax_plot']*1e3, color=col, lw=2.2, linestyle=ls,
+             label=f'{lbl}  $Z_{{ext}}$={Z_ext_val:.0f}Ω')
+
+ax4.legend(fontsize=9, loc='upper right')
+fig4.tight_layout()
+fig4.savefig('UTC_PD_Imax.png', dpi=150, bbox_inches='tight')
+
+print('\nSaved: UTC_PD_S11.png, UTC_PD_FreqResp.png, UTC_PD_PRL.png, UTC_PD_Imax.png')
