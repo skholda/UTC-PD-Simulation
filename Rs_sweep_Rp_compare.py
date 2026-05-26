@@ -76,14 +76,15 @@ f = np.linspace(0.1e9, 60e9, 4000)
 w = 2*np.pi*f
 
 # ── Compute ─────────────────────────────────────────────────────────
-results = {}      # results[Rp][Rs] = (Hd_dB, f3dB)
+results = {}      # results[Rp][Rs] = (H_dBohm, f3dB_norm)
 for Rp, _ in Rp_cases:
     results[Rp] = {}
     for Rs in Rs_list:
         Ht = H_total(w, Rs, Rp)
-        Hd = 20*np.log10(np.abs(Ht) / np.abs(Ht[0]))
-        f3 = find_3dB(f, Hd)
-        results[Rp][Rs] = (Hd, f3)
+        H_abs_dB = 20*np.log10(np.abs(Ht))            # absolute |H| in dBΩ
+        Hd_norm  = 20*np.log10(np.abs(Ht)/np.abs(Ht[0]))
+        f3 = find_3dB(f, Hd_norm)
+        results[Rp][Rs] = (H_abs_dB, f3)
 
 # ── Plot (single overlay) ──────────────────────────────────────────
 cmap = plt.cm.viridis
@@ -92,7 +93,7 @@ ls_map = {np.inf: '-', 50.0: '--'}     # solid = no shunt, dashed = Rp=50Ω
 
 fig, ax = plt.subplots(figsize=(10, 6.5))
 fig.suptitle(
-    r'$R_s$ sweep — Frequency Response (Normalized)' '\n'
+    r'$R_s$ sweep — Transimpedance $|H_{tot}|$ (absolute)' '\n'
     rf'$C_j$={C_PD*1e15:.1f} fF,  $L_{{CPW}}$={L_CPW*1e12:.1f} pH,  '
     rf'$C_{{CPW}}$={C_CPW*1e15:.2f} fF',
     fontsize=12, fontweight='bold')
@@ -100,18 +101,13 @@ fig.suptitle(
 for Rp, _ in Rp_cases:
     for ci, Rs in enumerate(Rs_list):
         Hd, f3 = results[Rp][Rs]
-        f3_str = f'{f3:.1f}' if not np.isnan(f3) else '>60'
         rp_lbl = r'$R_p{=}\infty$' if np.isinf(Rp) else r'$R_p{=}50\,\Omega$'
         ax.plot(f/1e9, Hd, color=colors[ci], lw=1.7, ls=ls_map[Rp],
-                label=rf'$R_s$={Rs:>2} Ω, {rp_lbl}  |  $f_{{3dB}}$={f3_str} GHz')
+                label=rf'$R_s$={Rs:>2} Ω, {rp_lbl}  |  $H(0)$={Hd[0]:.2f} dBΩ')
 
-ax.axhline(-3, color='gray', ls=':', lw=0.9, alpha=0.7)
-ax.text(58, -2.7, '$-$3 dB', fontsize=9, color='gray',
-        ha='right', va='bottom')
 ax.set_xlabel('Frequency (GHz)', fontsize=11)
-ax.set_ylabel('Normalized Response (dB)', fontsize=11)
+ax.set_ylabel(r'$|H_{tot}|$ (dBΩ)', fontsize=11)
 ax.set_xlim(0, 60)
-ax.set_ylim(-15, 3)
 ax.grid(True, alpha=0.3)
 ax.legend(fontsize=8.5, loc='lower left', framealpha=0.9, ncol=2)
 
