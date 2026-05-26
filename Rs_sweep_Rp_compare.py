@@ -85,36 +85,35 @@ for Rp, _ in Rp_cases:
         f3 = find_3dB(f, Hd)
         results[Rp][Rs] = (Hd, f3)
 
-# ── Plot ────────────────────────────────────────────────────────────
+# ── Plot (single overlay) ──────────────────────────────────────────
 cmap = plt.cm.viridis
 colors = [cmap(i/(len(Rs_list)-1)) for i in range(len(Rs_list))]
+ls_map = {np.inf: '-', 50.0: '--'}     # solid = no shunt, dashed = Rp=50Ω
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5.5), sharey=True)
+fig, ax = plt.subplots(figsize=(10, 6.5))
 fig.suptitle(
     r'$R_s$ sweep — Frequency Response (Normalized)' '\n'
     rf'$C_j$={C_PD*1e15:.1f} fF,  $L_{{CPW}}$={L_CPW*1e12:.1f} pH,  '
     rf'$C_{{CPW}}$={C_CPW*1e15:.2f} fF',
     fontsize=12, fontweight='bold')
 
-for ai, (Rp, title) in enumerate(Rp_cases):
-    ax = axes[ai]
+for Rp, _ in Rp_cases:
     for ci, Rs in enumerate(Rs_list):
         Hd, f3 = results[Rp][Rs]
         f3_str = f'{f3:.1f}' if not np.isnan(f3) else '>60'
-        ax.plot(f/1e9, Hd, color=colors[ci], lw=1.8,
-                label=rf'$R_s$={Rs:>2} Ω  |  $f_{{3dB}}$={f3_str} GHz')
+        rp_lbl = r'$R_p{=}\infty$' if np.isinf(Rp) else r'$R_p{=}50\,\Omega$'
+        ax.plot(f/1e9, Hd, color=colors[ci], lw=1.7, ls=ls_map[Rp],
+                label=rf'$R_s$={Rs:>2} Ω, {rp_lbl}  |  $f_{{3dB}}$={f3_str} GHz')
 
-    ax.axhline(-3, color='gray', ls='--', lw=0.9, alpha=0.7)
-    ax.text(58, -2.7, '$-$3 dB', fontsize=9, color='gray',
-            ha='right', va='bottom')
-    ax.set_title(title, fontsize=12, fontweight='bold')
-    ax.set_xlabel('Frequency (GHz)', fontsize=11)
-    if ai == 0:
-        ax.set_ylabel('Normalized Response (dB)', fontsize=11)
-    ax.set_xlim(0, 60)
-    ax.set_ylim(-15, 3)
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=9, loc='lower left', framealpha=0.9)
+ax.axhline(-3, color='gray', ls=':', lw=0.9, alpha=0.7)
+ax.text(58, -2.7, '$-$3 dB', fontsize=9, color='gray',
+        ha='right', va='bottom')
+ax.set_xlabel('Frequency (GHz)', fontsize=11)
+ax.set_ylabel('Normalized Response (dB)', fontsize=11)
+ax.set_xlim(0, 60)
+ax.set_ylim(-15, 3)
+ax.grid(True, alpha=0.3)
+ax.legend(fontsize=8.5, loc='lower left', framealpha=0.9, ncol=2)
 
 fig.tight_layout()
 out_path = 'Rs_sweep_Rp_compare.png'
