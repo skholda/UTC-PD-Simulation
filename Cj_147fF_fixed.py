@@ -134,27 +134,51 @@ for cfg in configs:
     plot_data.append((cfg,fs11,S11m,S11s,rms_s11,fm,pm,rows))
 
 # ── Plot ─────────────────────────────────────────────────────────
-fig, axes = plt.subplots(2, 4, figsize=(20, 9))
+def draw_smith(ax, lw_grid=0.6):
+    ax.set_xlim(-1.08,1.08); ax.set_ylim(-1.08,1.08)
+    ax.set_aspect('equal'); ax.axis('off')
+    ax.add_patch(plt.Circle((0,0),1,fill=False,color='#888',lw=lw_grid+0.3))
+    ax.axhline(0,color='#888',lw=lw_grid,zorder=0)
+    for r in [0.2,0.5,1,2,5]:
+        cx,rad=r/(r+1),1/(r+1)
+        ax.add_patch(plt.Circle((cx,0),rad,fill=False,color='#aaa',
+                                lw=lw_grid,ls=':',zorder=0))
+    theta=np.linspace(0,np.pi,400)
+    for x in [0.2,0.5,1,2,5]:
+        for sgn in [1,-1]:
+            cx,cy,rad=1,sgn/x,1/x
+            xx=cx+rad*np.cos(theta); yy=cy+rad*np.sin(theta)*sgn
+            m=(xx**2+yy**2<=1.002)
+            ax.plot(xx[m],yy[m],color='#aaa',lw=lw_grid,ls=':',zorder=0)
+
+fig, axes = plt.subplots(3, 4, figsize=(20, 14))
 fig.suptitle(
     rf'Simulation with $C_j$ = {Cj_FIXED*1e15:.0f} fF fixed (all devices), others kept from original S11 fit' '\n'
-    r'Row 1: S11  |  Row 2: Frequency response — solid: $\tau_A$=7.86 ps   dashed: $\tau_A$=3.53 ps',
+    r'Row 1: Smith chart  |  Row 2: $|S_{11}|$ (dB)  |  Row 3: Frequency response (solid $\tau_A$=7.86 ps, dashed $\tau_A$=3.53 ps)',
     fontsize=11, fontweight='bold')
 
 for ci,(cfg,fs11,S11m,S11s,rms_s11,fm,pm,rows) in enumerate(plot_data):
     col=cfg['col']; mk=cfg['mk']
-    # S11
-    ax=axes[0,ci]
+    # Smith chart
+    ax = axes[0,ci]; draw_smith(ax)
+    ax.scatter(S11m.real, S11m.imag, s=10, color=col, zorder=6, label='Meas.')
+    ax.plot(S11s.real, S11s.imag, '--', color='k', lw=1.5, zorder=5, label='Sim')
+    ax.set_title(f'{cfg["lbl"]}    Cj=147 fF\nRMS|ΔΓ|={rms_s11:.4f}',
+                 fontsize=10, fontweight='bold')
+    ax.legend(fontsize=8.5, loc='lower left', framealpha=0.85,
+              edgecolor='none', handlelength=1.5, markerscale=1.6)
+    # S11 magnitude
+    ax=axes[1,ci]
     ax.plot(fs11/1e9,20*np.log10(np.abs(S11m)),'-',color=col,lw=1.0,label='Meas')
     ax.plot(fs11/1e9,20*np.log10(np.abs(S11s)),'--',color='navy',lw=1.5,
             label=f'Sim (Cj=147fF)  RMS={rms_s11:.4f}')
     ax.set_xlabel('Frequency (GHz)',fontsize=9)
     ax.set_ylabel('|S11| (dB)',fontsize=9)
-    ax.set_title(cfg['lbl'],fontsize=10,fontweight='bold')
     ax.set_xlim(0,fs11.max()/1e9)
     ax.legend(fontsize=8.5,loc='lower right')
     ax.grid(True,alpha=0.3)
     # Freq response
-    ax=axes[1,ci]
+    ax=axes[2,ci]
     ax.scatter(fm/1e9,pm,color='k',marker=mk,s=20,edgecolors=col,linewidths=1.0,
                zorder=5,label='Meas')
     for tag,tA,ls in TAU:
