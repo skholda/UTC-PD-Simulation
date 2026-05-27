@@ -1,16 +1,20 @@
 """
-UTC-PD 30 μm Final Simulation  (Both τ_A scenarios)
-====================================================
+UTC-PD 30 μm Final Simulation  (Both τ_A scenarios × Both drift models)
+========================================================================
 Incorporates all modifications from the analysis session:
   * Cj = 147 fF  (fixed for all devices)
   * L_Rp (38 Ω)  = 55.2 pH  (S11-fitted, vs MATLAB FEM 65.6 pH)
   * L_Rp other devices = MATLAB FEM
   * C_CPW = 46.53 fF  (pad-fitted)
-  * Two τ_A scenarios:
-      - τ_A = 7.862 ps  (code default, includes additional physics)
-      - τ_A = 3.530 ps  (paper formula: diffusion + quasi-field, D_e=118 cm²/s)
+  * Two τ_A scenarios (undepleted absorber):
+      - τ_A = 7.862 ps  (code default, effective)
+      - τ_A = 3.530 ps  (paper formula: diffusion + quasi-field)
+  * Two drift-velocity models:
+      - vos: constant overshoot (τ_Ad=0.76, τ_cl=0.13, τ_C=1.85 ps)
+      - vE : v(E) integrated from Lumerical E-field profile
+             (τ_Ad=2.03, τ_cl_eff=0.80, τ_C=7.73 ps; W_cl_eff=80 nm)
   * Other circuit params (Rs, L_CPW, L_CPW2) from original S11 fit
-  * Origin Pro export included (per τ_A scenario)
+  * Origin Pro export included
 
 Topology:
   I_ph || C_PD ── Rs ── L_CPW2 ── NodeA ── L_CPW ── R_L
@@ -36,34 +40,41 @@ v_os_InP    = 4.0e5      # m/s
 v_os_InGaAs = 2.1e5
 v_h_InGaAs  = 4.5e4
 
-# Drift / hole transit times (independent of τ_A scenario)
-tau_Ad = W_A_dep / v_os_InGaAs
-tau_cl = W_cliff / v_os_InP
-tau_C  = W_C     / v_os_InP
+# Hole transit (always v_h_InGaAs, no v(E) for holes here)
 tau_h  = W_A_dep / v_h_InGaAs
 
 # ═══════════════════════════════════════════════════════════════════
-# 2. TWO τ_A SCENARIOS
+# 2. SCENARIOS: 2 τ_A × 2 drift models = 4 combos (we show 2 key ones)
 # ═══════════════════════════════════════════════════════════════════
-TAU_SCENARIOS = [
-    dict(tag='tauA_7p86', tauA=7.862e-12,
-         label=r'$\tau_A$=7.86 ps (code)',
-         short='7.86ps'),
-    dict(tag='tauA_3p53', tauA=3.530e-12,
-         label=r'$\tau_A$=3.53 ps (paper)',
-         short='3.53ps'),
+# Drift transit times
+DRIFT_VOS = dict(tau_Ad=W_A_dep/v_os_InGaAs, tau_cl=W_cliff/v_os_InP,
+                 tau_C=W_C/v_os_InP, W_cl_eff=W_cliff, tag='vos')
+DRIFT_VE  = dict(tau_Ad=2.026e-12, tau_cl=0.272e-12+0.527e-12,  # grad + cliff lumped
+                 tau_C=7.731e-12, W_cl_eff=80e-9, tag='vE')
+
+SCENARIOS = [
+    dict(tag='vos_tauA7p86', tauA=7.862e-12, drift=DRIFT_VOS,
+         label=r'$v_{os}$, $\tau_A$=7.86 ps  (baseline)'),
+    dict(tag='vos_tauA3p53', tauA=3.530e-12, drift=DRIFT_VOS,
+         label=r'$v_{os}$, $\tau_A$=3.53 ps  (paper $\tau_A$)'),
+    dict(tag='vE_tauA7p86',  tauA=7.862e-12, drift=DRIFT_VE,
+         label=r'$v(E)$, $\tau_A$=7.86 ps  (new drift)'),
+    dict(tag='vE_tauA3p53',  tauA=3.530e-12, drift=DRIFT_VE,
+         label=r'$v(E)$, $\tau_A$=3.53 ps  (new drift, paper $\tau_A$)'),
 ]
 
-def H_ph_factory(tau_A):
+def H_ph_factory(tauA, drift):
+    tau_Ad = drift['tau_Ad']; tau_cl = drift['tau_cl']; tau_C = drift['tau_C']
+    W_cl_eff = drift['W_cl_eff']
     def H_ph(w):
-        sinc = lambda x: np.sinc(x / np.pi)
-        HA   = 1 / (1 + 1j*w*tau_A)
-        HAd  = sinc(w*tau_Ad/2) * np.exp(-1j*(w*tau_A + w*tau_Ad/2))
-        Hcl  = sinc(w*tau_cl/2) * np.exp(-1j*(w*tau_A + w*tau_Ad + w*tau_cl/2))
-        Hco  = sinc(w*tau_C/2)  * np.exp(-1j*(w*tau_A + w*tau_Ad + w*tau_cl + w*tau_C/2))
-        HAd_h = sinc(w*tau_h/2) * np.exp(-1j*(w*tau_A + w*tau_h/2))
+        sinc = lambda x: np.sinc(x/np.pi)
+        HA    = 1/(1+1j*w*tauA)
+        HAd   = sinc(w*tau_Ad/2)*np.exp(-1j*(w*tauA + w*tau_Ad/2))
+        Hcl   = sinc(w*tau_cl/2)*np.exp(-1j*(w*tauA + w*tau_Ad + w*tau_cl/2))
+        Hco   = sinc(w*tau_C/2) *np.exp(-1j*(w*tauA + w*tau_Ad + w*tau_cl + w*tau_C/2))
+        HAd_h = sinc(w*tau_h/2)*np.exp(-1j*(w*tauA + w*tau_h/2))
         return (W_A_undep*HA + W_A_dep*HAd + W_A_dep*HAd_h
-                + W_cliff*Hcl + W_C*Hco) / (W_tot + W_A_dep)
+                + W_cl_eff*Hcl + W_C*Hco) / (W_tot + W_A_dep)
     return H_ph
 
 # ═══════════════════════════════════════════════════════════════════
@@ -159,13 +170,16 @@ for cfg in configs:
     cfg.update(fs11=fs11, S11m=S11m, S11s=S11s, rms_s11=rms_s11,
                fm=fm, pm=pm, wm=wm)
 
-# Compute freq response per τ_A scenario
-for sc in TAU_SCENARIOS:
-    print(f'\n--- {sc["label"]}  (τ_A = {sc["tauA"]*1e12:.3f} ps) ---')
+# Compute freq response per scenario (drift model × τ_A)
+for sc in SCENARIOS:
+    d = sc['drift']
+    print(f'\n--- {sc["label"]} ---')
+    print(f'    drift τ: Ad={d["tau_Ad"]*1e12:.3f}, cl_eff={d["tau_cl"]*1e12:.3f}, '
+          f'C={d["tau_C"]*1e12:.3f} ps   |   W_cl_eff={d["W_cl_eff"]*1e9:.0f} nm')
     print(f'{"Device":>10} | {"L_CPW":>7} | {"L_CPW2":>7} | {"L_Rp":>7} | '
           f'{"RMS_S11":>9} | {"BW":>7} | {"RMS_H":>7}')
     print('-'*100)
-    H_ph = H_ph_factory(sc['tauA'])
+    H_ph = H_ph_factory(sc['tauA'], sc['drift'])
     sc['results'] = {}
     for cfg in configs:
         Hckt_m = H_ckt(cfg['wm'], Rs, Cj, cfg['Rp'], cfg['Lcpw'], cfg['Lrp'], cfg['Lcpw2'])
@@ -228,19 +242,22 @@ for ci, cfg in enumerate(configs):
     ax.set_xlim(0, cfg['fs11'].max()/1e9)
     ax.legend(fontsize=8.5, loc='lower right'); ax.grid(True, alpha=0.3)
 
-    # Freq response (both τ_A overlaid)
+    # Freq response (4 scenarios overlaid)
     ax = axes[2, ci]
     ax.scatter(cfg['fm']/1e9, cfg['pm'], color='k', marker=mk, s=22,
                edgecolors=col, linewidths=1.0, zorder=5, label='Meas.')
-    for sc, ls, lw in zip(TAU_SCENARIOS, ['-','--'], [2.0, 1.6]):
+    sc_styles = [('-', col,    2.0),     # vos τ_A=7.86
+                 ('--', col,   1.5),     # vos τ_A=3.53
+                 ('-',  'navy',1.8),     # vE  τ_A=7.86
+                 ('--', 'navy',1.4)]     # vE  τ_A=3.53
+    for sc, (ls, clr, lw) in zip(SCENARIOS, sc_styles):
         d = sc['results'][cfg['lbl']]
-        clr = col if ls == '-' else 'navy'
         ax.plot(f_plot/1e9, d['Hd_p'], ls, color=clr, lw=lw,
                 label=f'{sc["label"]}  BW={d["bw_s"]} GHz  RMS={d["rms_H"]:.2f}dB')
     ax.axhline(-3, color='gray', ls=':', lw=0.7, alpha=0.7)
     ax.set_xlabel('Frequency (GHz)', fontsize=9); ax.set_ylabel('Normalized H (dB)', fontsize=9)
     ax.set_xlim(0, 50); ax.set_ylim(-12, 3)
-    ax.legend(fontsize=8, loc='lower left'); ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=7, loc='lower left'); ax.grid(True, alpha=0.3)
 
 fig.tight_layout()
 fig.savefig('UTC_PD_final_fit.png', dpi=150, bbox_inches='tight')
@@ -265,8 +282,8 @@ fig_sc.tight_layout(pad=1.5)
 fig_sc.savefig('UTC_PD_final_smith.png', dpi=200, bbox_inches='tight', facecolor='white')
 print('Saved: UTC_PD_final_smith.png')
 
-# ── Freq response overlay per τ_A ──────────────────────────────────
-for sc in TAU_SCENARIOS:
+# ── Freq response overlay per scenario ─────────────────────────────
+for sc in SCENARIOS:
     fig_fr, ax_fr = plt.subplots(figsize=(10, 6))
     for cfg in configs:
         d = sc['results'][cfg['lbl']]
@@ -277,7 +294,7 @@ for sc in TAU_SCENARIOS:
     ax_fr.set_xlabel('Frequency (GHz)', fontsize=12)
     ax_fr.set_ylabel('Normalized Response (dB)', fontsize=12)
     ax_fr.set_xlim(0, 45); ax_fr.set_ylim(-12, 3)
-    ax_fr.set_title(rf'Frequency Response (Meas vs Sim)  —  {sc["label"]}', fontsize=12)
+    ax_fr.set_title(rf'Frequency Response (Meas vs Sim) — {sc["label"]}', fontsize=11)
     ax_fr.legend(fontsize=10, loc='lower left'); ax_fr.grid(True, alpha=0.3)
     fig_fr.tight_layout()
     out = f'UTC_PD_final_freqresp_{sc["tag"]}.png'
@@ -318,8 +335,8 @@ for cfg in configs:
     _write(os.path.join(base, f'freqresp_meas_{t}.txt'),
            ['Freq_GHz','Norm_dB'], list(zip(cfg['fm']/1e9, cfg['pm'])))
 
-# Freq response per τ_A scenario
-for sc in TAU_SCENARIOS:
+# Freq response per scenario (4 combos)
+for sc in SCENARIOS:
     sub = os.path.join(base, sc['tag'])
     os.makedirs(sub, exist_ok=True)
     for cfg in configs:
@@ -327,9 +344,14 @@ for sc in TAU_SCENARIOS:
         Hd_p = sc['results'][cfg['lbl']]['Hd_p']
         _write(os.path.join(sub, f'freqresp_sim_{t}.txt'),
                ['Freq_GHz','Norm_dB'], list(zip(f_plot/1e9, Hd_p)))
-    # Per-scenario summary
     with open(os.path.join(sub, 'summary.txt'), 'w', encoding='utf-8') as f:
-        f.write('# tau_A = %.3f ps  (%s)\n' % (sc['tauA']*1e12, sc['label']))
+        d_ = sc['drift']
+        f.write(f'# Scenario: {sc["label"]}\n')
+        f.write(f'# tau_A      = {sc["tauA"]*1e12:.3f} ps\n')
+        f.write(f'# tau_Ad     = {d_["tau_Ad"]*1e12:.3f} ps\n')
+        f.write(f'# tau_cl_eff = {d_["tau_cl"]*1e12:.3f} ps\n')
+        f.write(f'# tau_C      = {d_["tau_C"]*1e12:.3f} ps\n')
+        f.write(f'# W_cl_eff   = {d_["W_cl_eff"]*1e9:.0f} nm\n')
         f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
                 'RMS_S11\tBW_GHz\tRMS_H_dB\n')
         for cfg in configs:
@@ -340,8 +362,8 @@ for sc in TAU_SCENARIOS:
                     f'{cfg["rms_s11"]:.5f}\t{bw_v:.4f}\t{d["rms_H"]:.4f}\n')
 
 print(f'\nOrigin export tree: {base}/')
-print('  smith_*.txt              — Smith chart (τ_A independent)')
+print('  smith_*.txt              — Smith chart (scenario-independent)')
 print('  s11_*.txt                — |S11| + phase')
-print('  freqresp_meas_*.txt      — Measured response (τ_A independent)')
-print('  tauA_7p86/freqresp_sim_*.txt + summary.txt   — Sim (τ_A=7.86 ps)')
-print('  tauA_3p53/freqresp_sim_*.txt + summary.txt   — Sim (τ_A=3.53 ps)')
+print('  freqresp_meas_*.txt      — Measured response (scenario-independent)')
+for sc in SCENARIOS:
+    print(f'  {sc["tag"]}/...         — Sim ({sc["label"]})')

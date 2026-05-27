@@ -1,4 +1,9 @@
-# tau_A = 3.530 ps  ($\tau_A$=3.53 ps (paper))
+# Scenario: $v_{os}$, $\tau_A$=3.53 ps  (paper $\tau_A$)
+# tau_A      = 3.530 ps
+# tau_Ad     = 0.762 ps
+# tau_cl_eff = 0.125 ps
+# tau_C      = 1.850 ps
+# W_cl_eff   = 50 nm
 Device	L_CPW_pH	L_CPW2_pH	L_Rp_pH	Cj_fF	Rs_ohm	RMS_S11	BW_GHz	RMS_H_dB
 Rp=200Ω	178.9000	0.0000	153.0000	147.0000	8.9200	0.04372	21.6112	0.7310
 Rp=38Ω	135.9000	43.0000	55.2000	147.0000	8.9200	0.03690	37.1232	0.6728
