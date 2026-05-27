@@ -53,20 +53,20 @@ vf_InGaAs = interp1d(E_InGaAs, v_InGaAs * 1e4, bounds_error=False,
 vf_Q11    = interp1d(E_Q11,    v_Q11    * 1e4, bounds_error=False,
                      fill_value=(v_Q11[0]    * 1e4, v_Q11[-1]    * 1e4))
 
-# ── Layer boundaries (μm) ───────────────────────────────────────────
-# z direction: n+ (substrate side, z=0) → p+ (top contact, z=+1.7)
-# Cliff peak at z ≈ 0.80 μm in data; cliff is 50 nm wide between
-# grading (toward absorber, larger z) and collector (toward n+, smaller z).
-#   Undep absorber : z = 1.00 to 1.48 μm  (480 nm)  — diffusion, not used here
-#   Depleted absorber : z = 0.84 to 1.00   (160 nm)  InGaAs
-#   Grading        : z = 0.81 to 0.84      ( 30 nm)  Q1.1/Q1.4
-#   Cliff          : z = 0.76 to 0.81      ( 50 nm)  InP (peak E)
-#   Collector      : z = 0.02 to 0.76      (740 nm)  InP (decreasing E)
+# ── Layer boundaries (μm) — from Dimension.xlsx ─────────────────────
+# z direction: n++ at bottom (z = -1 μm) → p+ at top (z = +1.74 μm)
+#   Collector      : z = 0.000 to 0.740   (740 nm)  InP  (Drift 440+300 nm)
+#   Cliff          : z = 0.740 to 0.790   ( 50 nm)  InP
+#   Grading Q1.1   : z = 0.790 to 0.805   ( 15 nm)  InGaAsP Q1.1
+#   Grading Q1.4   : z = 0.805 to 0.820   ( 15 nm)  InGaAsP Q1.4
+#   Dep. absorber  : z = 0.820 to 0.980   (160 nm)  InGaAs
+#   Undep absorber : z = 0.980 to 1.460   (480 nm)  InGaAs — diffusion only
 LAYERS = [
-    ('Depleted absorber',  0.84e-6, 1.00e-6, vf_InGaAs, 'InGaAs', 2.1e5),
-    ('Grading Q1.4+Q1.1',  0.81e-6, 0.84e-6, vf_Q11,    'Q1.1',   2.1e5),
-    ('Cliff (InP)',        0.76e-6, 0.81e-6, vf_InP,    'InP',    4.0e5),
-    ('Collector (InP)',    0.02e-6, 0.76e-6, vf_InP,    'InP',    4.0e5),
+    ('Depleted absorber',  0.820e-6, 0.980e-6, vf_InGaAs, 'InGaAs', 2.1e5),
+    ('Grading Q1.4',       0.805e-6, 0.820e-6, vf_Q11,    'Q1.4',   2.1e5),  # use Q11 curve (identical data)
+    ('Grading Q1.1',       0.790e-6, 0.805e-6, vf_Q11,    'Q1.1',   2.1e5),
+    ('Cliff (InP)',        0.740e-6, 0.790e-6, vf_InP,    'InP',    4.0e5),
+    ('Collector (InP)',    0.000e-6, 0.740e-6, vf_InP,    'InP',    4.0e5),
 ]
 
 def integrate_tau(z0, z1, vfunc, N=10000):
