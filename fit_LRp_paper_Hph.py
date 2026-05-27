@@ -29,7 +29,12 @@ W_A_paper = 480e-9         # undep absorber
 W_C_paper = 980e-9         # depleted region (dep abs + grading + cliff + collector)
 W_paper   = W_A_paper + W_C_paper
 tau_A     = 3.530e-12      # paper formula: W_A^2 / [D_e (3+ln R)]
-tau_C     = 10.557e-12     # v(E) integrated over 980 nm
+# τ_C: constant overshoot v_os over W_C, summed across materials
+#   dep abs (160 nm, InGaAs, v_os=2.1e5) : 0.762 ps
+#   grading (30 nm,  Q1.1/Q1.4, v_os=2.1e5): 0.143 ps
+#   cliff  (50 nm,  InP, v_os=4.0e5)       : 0.125 ps
+#   collector(740 nm, InP, v_os=4.0e5)     : 1.850 ps
+tau_C     = 0.762e-12 + 0.143e-12 + 0.125e-12 + 1.850e-12   # = 2.880 ps
 tau_R     = 0.07e-12       # dielectric relaxation (small)
 
 def H_ph(w):
@@ -100,7 +105,7 @@ for cfg in configs:
 print('='*100)
 print(f'PAPER H_ph:  W_A={W_A_paper*1e9:.0f} nm, W_C={W_C_paper*1e9:.0f} nm, '
       f'W={W_paper*1e9:.0f} nm')
-print(f'  τ_A={tau_A*1e12:.3f} ps (paper), τ_C={tau_C*1e12:.3f} ps (v(E) over W_C), '
+print(f'  τ_A={tau_A*1e12:.3f} ps (paper), τ_C={tau_C*1e12:.3f} ps (constant v_os over W_C), '
       f'τ_R={tau_R*1e12:.3f} ps')
 print(f'Circuit:  Cj={Cj_FIXED*1e15:.2f} fF (fixed), Rs={Rs}, C_CPW={C_CPW*1e15:.2f} fF')
 print(f'Fit:  per-device L_Rp via S11-only cost')
@@ -193,6 +198,6 @@ for ci, r in enumerate(results):
     ax.legend(fontsize=8.5, loc='lower left'); ax.grid(True, alpha=0.3)
 
 fig.tight_layout()
-out = 'fit_LRp_paper_Hph.png'
+out = 'fit_LRp_paper_Hph_vos.png'
 fig.savefig(out, dpi=150, bbox_inches='tight')
 print(f'\nSaved: {out}')
