@@ -22,7 +22,8 @@ Locked framework:
     Rs    = 8.92 Ω
     C_CPW = 46.53 fF   (pad-fitted)
     L_CPW, L_CPW2 : per-device (from prior fits)
-    L_Rp  : per-device  (200Ω: 0 pH, 38Ω: 24.64, 60Ω: 0.63, Open: 0)
+    L_Rp  : per-device, MATLAB FEM values (NOT fitted)
+            200Ω: 153.7 pH, 38Ω: 65.6 pH, 60Ω: 71.8 pH, Open: 0 pH
 
 Outputs:
   Combined fit figure, publication Smith, freq-response overlay,
@@ -96,13 +97,13 @@ ref_f_GHz, ref_loss_dB = _ns['ref_f_GHz'], _ns['ref_loss_dB']
 configs = [
     dict(lbl='Rp=200Ω', Rp=200.0,   col='#888888', mk='D',
          s1p=_ns['_s1p_200'], freq=_ns['_freq_200'],
-         Lcpw=178.9e-12, Lcpw2=0.0,     Lrp=0.0),         # 200Ω fit -> 0 pH
+         Lcpw=178.9e-12, Lcpw2=0.0,     Lrp=153.7e-12),   # MATLAB FEM
     dict(lbl='Rp=38Ω',  Rp=38.0,    col='#1B998B', mk='o',
          s1p=_ns['_s1p_33'],  freq=_ns['_freq_33'],
-         Lcpw=135.9e-12, Lcpw2=43.0e-12, Lrp=24.64e-12),  # 38Ω fit  -> 24.64 pH
+         Lcpw=135.9e-12, Lcpw2=43.0e-12, Lrp=65.6e-12),   # MATLAB FEM
     dict(lbl='Rp=60Ω',  Rp=60.0,    col='#FF8C00', mk='s',
          s1p=_ns['_s1p_55'],  freq=_ns['_freq_55'],
-         Lcpw=133.2e-12, Lcpw2=45.7e-12, Lrp=0.63e-12),   # 60Ω fit  -> 0.63 pH
+         Lcpw=133.2e-12, Lcpw2=45.7e-12, Lrp=71.8e-12),   # MATLAB FEM
     dict(lbl='Open',    Rp=np.inf,  col='#E91E8C', mk='^',
          s1p=_ns['_s1p_WO'],  freq=_ns['_freq_WO'],
          Lcpw=178.9e-12, Lcpw2=0.0,     Lrp=0.0),
