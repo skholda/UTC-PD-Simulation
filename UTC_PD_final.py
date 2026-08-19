@@ -15,12 +15,13 @@ Locked framework:
 
   Transit times:
     τ_A = 3.530 ps   (paper formula:  W_A^2 / [D_e (3 + ln(p_max/p_min))])
-    τ_C = 2.880 ps   (constant v_os over W_C, summed:
-                        0.762 + 0.143 + 0.125 + 1.850 ps)
+    τ_C = 9.321 ps   (v(E) pointwise integral, integral dz/v(E(z)) over W_C,
+                        on Lumerical CHARGE E-field at -7 V, Iph=1.5 mA;
+                        collector 6.495 + cliff 0.527 + grading 0.272 + dep-abs 2.026 ps)
     τ_R = 0.070 ps   (dielectric relaxation, p~1e18 InGaAs)
     τ_h = 3.560 ps   (depleted-absorber hole, W_Ad / v_h, v_h=4.5e4 m/s)
 
-  Transit-time-limited f_tr = 38.37 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 29.70 GHz  (|H_ph| = -3 dB)
 
   Circuit (S11-fitted):
     Cj    = 131.0 fF   (common, S11-only fit)
@@ -52,7 +53,9 @@ W_Adep    = 160e-9        # depleted absorber (InGaAs) -> photogenerated hole so
 W_paper   = W_A_paper + W_C_paper
 W_norm    = W_paper + W_Adep    # normalization includes the extra hole current
 tau_A     = 3.530e-12
-tau_C     = 2.880e-12     # = 0.762 + 0.143 + 0.125 + 1.850 ps (v_os sum)
+tau_C     = 9.321e-12     # v(E) pointwise integral over W_C on Lumerical CHARGE
+                          #   E-field (-7 V, Iph=1.5 mA); per-layer:
+                          #   collector 6.495 + cliff 0.527 + grading 0.272 + dep-abs 2.026 ps
 tau_R     = 0.070e-12
 v_h_InGaAs = 4.5e4        # m/s  hole saturation velocity, InGaAs
 tau_h     = W_Adep / v_h_InGaAs   # 3.56 ps  (depleted-absorber hole, backward drift)
@@ -142,7 +145,7 @@ print('-'*100)
 print(f'  H_ph: paper 2-region + dep-abs hole  W_A={W_A_paper*1e9:.0f} nm, '
       f'W_C={W_C_paper*1e9:.0f} nm, W_Ad={W_Adep*1e9:.0f} nm')
 print(f'        τ_A={tau_A*1e12:.3f} ps  (paper diff+quasi-field)')
-print(f'        τ_C={tau_C*1e12:.3f} ps  (constant v_os sum)')
+print(f'        τ_C={tau_C*1e12:.3f} ps  (v(E) integral, Lumerical -7V 1.5mA)')
 print(f'        τ_R={tau_R*1e12:.3f} ps  (dielectric relaxation)')
 print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, backward drift)')
 print(f'  Circuit:  Cj={Cj*1e15:.1f} fF, Rs={Rs} Ω, C_CPW={C_CPW*1e15:.2f} fF')
@@ -310,7 +313,7 @@ with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
     f.write(f'# H_ph: paper 2-region + dep-abs hole  W_A={W_A_paper*1e9:.0f} nm  '
             f'W_C={W_C_paper*1e9:.0f} nm  W_Ad={W_Adep*1e9:.0f} nm  W_norm={W_norm*1e9:.0f} nm\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_R={tau_R*1e12:.3f} ps  tau_h={tau_h*1e12:.3f} ps  |  f_tr=38.37 GHz\n')
+            f'tau_R={tau_R*1e12:.3f} ps  tau_h={tau_h*1e12:.3f} ps  |  f_tr=29.70 GHz\n')
     f.write(f'# Circuit:  Cj={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')
