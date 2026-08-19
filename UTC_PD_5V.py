@@ -26,7 +26,7 @@ tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth
 # transit times from SATURATION velocities (τ_A kept, others = W/v_sat):
 tau_eD = W_D / 8.94e4                             # 2.685 ps (InGaAs e sat 0.89e7 cm/s)
 tau_C  = W_C / 1.076e5                            # 6.877 ps (InP e sat 1.08e7 cm/s)
-tau_h  = W_D / 2.5e4                              # 9.60 ps  (InGaAs h sat 0.25e7 cm/s)
+tau_h  = W_D / 4.8e4                              # 5.00 ps  (InGaAs h sat 0.48e7 cm/s, lit.)
 eta_U = W_U/(W_U + W_D); eta_D = W_D/(W_U + W_D)  # uniform gen: 0.6667 / 0.3333
 
 def H_ph(w):
