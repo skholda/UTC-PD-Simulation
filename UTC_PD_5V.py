@@ -19,22 +19,31 @@ import os, numpy as np, pandas as pd
 import matplotlib.pyplot as plt
 
 # ═══════════════════════════════════════════════════════════════════
-# 1. H_ph(ω) — rigorous Ramo J_tot integral (SAME as -7 V baseline)
+# 1. H_ph(ω) — exact paper H_MUTC (SAME as -7 V baseline, bias-independent)
 # ═══════════════════════════════════════════════════════════════════
-W_A_paper = 480e-9; W_C_paper = 980e-9; W_Adep = 160e-9
-W_norm    = W_A_paper + W_C_paper + 2*W_Adep     # 1780 nm
-tau_A = 3.530e-12; tau_C = 9.321e-12; tau_R = 0.070e-12
-tau_h = W_Adep / 4.5e4                            # 3.556 ps
-tau_gcc = 7.295e-12; tau_dep = 2.026e-12
-tau_e_ds = tau_gcc + 0.5*tau_dep                 # 8.308 ps
+W_U = 480e-9; W_D = 160e-9; W_C = 820e-9; W_T = W_U + W_D + W_C   # 1460 nm
+tau_A = 3.530e-12; tau_R = 0.070e-12
+tau_eD = 2.026e-12; tau_C = 7.295e-12
+tau_h = W_D / 4.5e4                               # 3.556 ps
+_alpha = 0.68e6                                   # back-side illumination (dep abs first)
+_A_D = 1 - np.exp(-_alpha*W_D)
+_A_U = np.exp(-_alpha*W_D) * (1 - np.exp(-_alpha*W_U))
+eta_U = _A_U/(_A_U + _A_D); eta_D = _A_D/(_A_U + _A_D)   # 0.708 / 0.292
 
 def H_ph(w):
     sinc = lambda x: np.sinc(x/np.pi)
-    e_diff        = W_A_paper*(2.0+1j*w*tau_R)/(2.0*(1.0+1j*w*tau_R))/(1.0+1j*w*tau_A)
-    e_drift_undep = W_C_paper*sinc(w*tau_C/2)*np.exp(-1j*w*tau_C/2)/(1.0+1j*w*tau_A)
-    e_drift_dep   = W_Adep*sinc(w*tau_e_ds/2)*np.exp(-1j*w*tau_e_ds/2)
-    h_drift_dep   = W_Adep*sinc(w*tau_h/2)*np.exp(-1j*w*tau_h/2)
-    return (e_diff + e_drift_undep + e_drift_dep + h_drift_dep)/W_norm
+    D = lambda tau: sinc(w*tau/2)*np.exp(-1j*w*tau/2)
+    def Tri(tau):
+        x = 1j*w*tau
+        with np.errstate(invalid='ignore', divide='ignore'):
+            val = (1.0 - D(tau))/x
+        return np.where(np.abs(x) < 1e-12, 0.5 + 0j, val)
+    casc = sinc(w*tau_C/2)*np.exp(-1j*w*(tau_eD + tau_C/2))
+    b1 = (W_U*(2.0+1j*w*tau_R)/(2.0*(1.0+1j*w*tau_R)) + W_D*D(tau_eD) + W_C*casc)
+    b1 = b1*eta_U/(W_T*(1.0+1j*w*tau_A))
+    b2 = (W_U*D(tau_h) + W_D*Tri(tau_eD) + W_D*Tri(tau_h) + W_C*sinc(w*tau_eD/2)*casc)
+    b2 = b2*eta_D/W_T
+    return b1 + b2
 
 # ═══════════════════════════════════════════════════════════════════
 # 2. CIRCUIT — bias-independent params locked; only Cj changes (C-V)

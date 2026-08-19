@@ -1,9 +1,9 @@
 # Final baseline (locked)
-# H_ph: rigorous Ramo J_tot integral (undep e w/ tau_A; dep-abs e/h in-situ)  W_A=480 nm  W_C=980 nm  W_Ad=160 nm  W_norm=1780 nm
-#   tau_A=3.530 ps  tau_C=9.321 ps  tau_eds=8.308 ps  tau_R=0.070 ps  tau_h=3.556 ps  |  f_tr=30.46 GHz
+# H_ph: exact paper H_MUTC (eta-weighted, uniform-gen triangular dep-abs)  W_U=480 nm  W_D=160 nm  W_C=820 nm  W_T=1460 nm  eta_U=0.708 eta_D=0.292 (back-side illum.)
+#   tau_A=3.530 ps  tau_eD=2.026 ps  tau_C=7.295 ps  tau_R=0.070 ps  tau_h=3.556 ps  |  f_tr=31.53 GHz
 # Circuit:  Cj=131.00 fF  Rs=8.92 ohm  C_CPW=46.53 fF
 Device	L_CPW_pH	L_CPW2_pH	L_Rp_pH	Cj_fF	Rs_ohm	RMS_S11	BW_GHz	RMS_H_dB
-Rp=200Ω	197.9000	0.0000	153.7000	131.0000	8.9200	0.07243	19.7546	0.5934
-Rp=38Ω	141.6000	56.3000	65.6000	131.0000	8.9200	0.06011	29.7565	0.5683
-Rp=60Ω	149.9000	48.0000	71.8000	131.0000	8.9200	0.06279	25.1448	0.8562
-Open	197.9000	0.0000	0.0000	131.0000	8.9200	0.07584	18.1774	0.8834
+Rp=200Ω	197.9000	0.0000	153.7000	131.0000	8.9200	0.07243	20.0141	0.6025
+Rp=38Ω	141.6000	56.3000	65.6000	131.0000	8.9200	0.06011	30.4652	0.4917
+Rp=60Ω	149.9000	48.0000	71.8000	131.0000	8.9200	0.06279	25.6439	0.7744
+Open	197.9000	0.0000	0.0000	131.0000	8.9200	0.07584	18.3770	0.8264

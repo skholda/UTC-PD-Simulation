@@ -2,30 +2,35 @@
 UTC-PD 30 μm Final Simulation  (BASELINE — locked configuration)
 =================================================================
 Locked framework:
-  H_ph(ω) = rigorous Ramo spatial-average from J_tot = (1/W)∫[J_e+J_h]dx
-    = 1/W_norm · [ ① + ② + ③ + ④ ]
-      ① = W_A/(1+jωτ_A) · (2+jωτ_R)/(2(1+jωτ_R))   undep-abs electron (diffusion)
-      ② = W_C/(1+jωτ_A) · sinc(ωτ_C/2)·exp(-jωτ_C/2)  same e drifting collector
-      ③ = W_Ad · sinc(ωτ_eds/2)·exp(-jωτ_eds/2)       dep-abs in-situ e (no τ_A)
-      ④ = W_Ad · sinc(ωτ_h/2)·exp(-jωτ_h/2)           dep-abs in-situ hole (no τ_A)
-    Key: τ_A (diffusion pole) applies ONLY to undep-absorber-generated carriers.
-    Depleted-absorber carriers are born inside the field -> no diffusion delay.
+  H_ph(ω) = exact paper MUTC transfer function H_MUTC(ω), two generation groups:
+    Bracket 1 (undep-abs generated, weight η_U/[W_T(1+jωτ_A)]):
+      W_U·(2+jωτ_R)/(2(1+jωτ_R)) + W_D·D(τ_eD) + W_C·sinc(ωτ_C/2)·exp(-jω(τ_eD+τ_C/2))
+    Bracket 2 (dep-abs generated in-situ, weight η_D/W_T, NO τ_A pole):
+      W_U·D(τ_h) + (W_D/jωτ_eD)·{1-D(τ_eD)} + (W_D/jωτ_h)·{1-D(τ_h)}
+      + W_C·sinc(ωτ_eD/2)·sinc(ωτ_C/2)·exp(-jω(τ_eD+τ_C/2))
+    with D(τ)=sinc(ωτ/2)·exp(-jωτ/2), sinc(x)=sin(x)/x.
+    Key: τ_A (diffusion pole) multiplies ONLY the undep-absorber group. Dep-abs
+    carriers are born in-situ -> no τ_A, uniform-generation triangular transit.
+    Each region a carrier crosses gets its own term (undep e AND dep e both
+    cross the collector -> W_C appears in both brackets).
 
-  Region split:
-    W_A = 480 nm  (undep absorber, p+ InGaAs, diff + quasi-field)
-    W_C = 980 nm  (depleted region: dep abs + grading + cliff + collector)
-    W_Ad= 160 nm  (depleted absorber, in-situ e/h source)
-    W_norm = W_A + W_C + 2·W_Ad = 1780 nm
+  Region split (each width counted once; W_T = W_U+W_D+W_C):
+    W_U = 480 nm  (undep absorber, p+ InGaAs, diff + quasi-field)
+    W_D = 160 nm  (depleted absorber, in-situ e/h generation)
+    W_C = 820 nm  (electron-only collector: grading + cliff + collector)
+    W_T = 1460 nm
+
+  Generation fractions (Beer-Lambert, back-side illum., α=0.68/μm InGaAs):
+    η_U = 0.708   η_D = 0.292   (η_U + η_D = 1)
 
   Transit times:
-    τ_A   = 3.530 ps   (paper formula:  W_A^2 / [D_e (3 + ln(p_max/p_min))])
-    τ_C   = 9.321 ps   (v(E) integral over full depleted region W_C,
-                          Lumerical CHARGE -7 V, Iph=1.5 mA)
-    τ_eds = 8.308 ps   (in-situ e: τ_gcc 7.295 + ½·τ_dep 2.026)
+    τ_A   = 3.530 ps   (undep-abs diffusion:  W_U^2 / [D_e (3 + ln(p_max/p_min))])
+    τ_eD  = 2.026 ps   (dep-abs electron, v(E) integral over 160 nm)
+    τ_C   = 7.295 ps   (collector-only electron, v(E) integral over 820 nm)
     τ_R   = 0.070 ps   (dielectric relaxation, p~1e18 InGaAs)
-    τ_h   = 3.560 ps   (depleted-absorber hole, W_Ad / v_h, v_h=4.5e4 m/s)
+    τ_h   = 3.556 ps   (depleted-absorber hole, W_D / v_h, v_h=4.5e4 m/s)
 
-  Transit-time-limited f_tr = 30.46 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 31.53 GHz  (|H_ph| = -3 dB)
 
   Circuit (S11-fitted):
     Cj    = 131.0 fF   (common, S11-only fit)
@@ -49,50 +54,68 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # ═══════════════════════════════════════════════════════════════════
-# 1. H_ph(ω)  —  paper 2-region + depleted-absorber hole term (LOCKED)
+# 1. H_ph(ω)  —  exact paper MUTC transfer function  H_MUTC(ω)  (LOCKED)
 # ═══════════════════════════════════════════════════════════════════
-W_A_paper = 480e-9        # undepleted absorber (electron diffusion + quasi-field)
-W_C_paper = 980e-9        # depleted region: dep abs + grading + cliff + collector
-W_Adep    = 160e-9        # depleted absorber (InGaAs) -> in-situ e/h source
-W_paper   = W_A_paper + W_C_paper
-# Rigorous Ramo normalization: each induced particle current enters the spatial
-# average with its own width weight. Undep-absorber electron path contributes
-# W_A (diffusion) + W_C (subsequent collector drift); dep-absorber in-situ
-# electron and hole each contribute W_Ad. -> W_norm = W_A + W_C + 2*W_Ad.
-W_norm    = W_A_paper + W_C_paper + 2*W_Adep    # 1780 nm
-tau_A     = 3.530e-12
-tau_C     = 9.321e-12     # v(E) pointwise integral over W_C on Lumerical CHARGE
-                          #   E-field (-7 V, Iph=1.5 mA); per-layer:
-                          #   collector 6.495 + cliff 0.527 + grading 0.272 + dep-abs 2.026 ps
-tau_R     = 0.070e-12
-v_h_InGaAs = 4.5e4        # m/s  hole saturation velocity, InGaAs
-tau_h     = W_Adep / v_h_InGaAs   # 3.56 ps  (depleted-absorber hole, backward drift)
-# in-situ dep-absorber electron: drift over grading+cliff+collector (tau_gcc)
-# plus, on average, half of the depleted-absorber (tau_dep). From the same
-# v(E) sub-integrals: tau_gcc = 7.295 ps, tau_dep = 2.026 ps.
-tau_gcc   = 7.295e-12
-tau_dep   = 2.026e-12
-tau_e_ds  = tau_gcc + 0.5*tau_dep      # 8.308 ps
+#   Two generation groups (by absorption location):
+#     Bracket 1 (undep-absorber generated, weight η_U/[W_T(1+jωτ_A)]):
+#         W_U·(2+jωτ_R)/(2(1+jωτ_R))
+#       + W_D·D(τ_eD)                                   crossing dep absorber
+#       + W_C·sinc(ωτ_C/2)·exp(-jω(τ_eD+τ_C/2))         crossing collector
+#     Bracket 2 (dep-absorber generated in-situ, weight η_D/W_T, NO τ_A pole):
+#         W_U·D(τ_h)                                     Ramo complement (hole→p+)
+#       + (W_D/jωτ_eD)·{1-D(τ_eD)}                       electron, uniform-gen triangular
+#       + (W_D/jωτ_h )·{1-D(τ_h )}                       hole, uniform-gen triangular
+#       + W_C·sinc(ωτ_eD/2)·sinc(ωτ_C/2)·exp(-jω(τ_eD+τ_C/2))   e→collector
+#   with D(τ)=sinc(ωτ/2)·exp(-jωτ/2),  sinc(x)=sin(x)/x.
+W_U = 480e-9              # undepleted p-InGaAs absorber   (diffusion, quasi-field)
+W_D = 160e-9             # depleted InGaAs absorber        (in-situ e/h generation)
+W_C = 820e-9             # electron-only collector         (grading 30 + cliff 50 + collector 740)
+W_T = W_U + W_D + W_C    # 1460 nm  total transport thickness
+
+tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field)
+tau_R  = 0.070e-12       # dielectric relaxation, p+ InGaAs
+tau_eD = 2.026e-12       # depleted-absorber electron transit  (v(E) integral, 160 nm)
+tau_C  = 7.295e-12       # collector-only electron transit     (v(E) integral, 820 nm)
+v_h_InGaAs = 4.5e4       # m/s  hole saturation velocity, InGaAs
+tau_h  = W_D / v_h_InGaAs   # 3.556 ps  depleted-absorber hole transit
+
+# Generation fractions η_U, η_D via Beer-Lambert (back-side / substrate
+# illumination: light reaches the depleted absorber first, then the
+# undepleted absorber). InGaAs absorption α at 1.55 μm; InP transparent.
+_alpha = 0.68e6          # 1/m
+_A_D = 1 - np.exp(-_alpha*W_D)
+_A_U = np.exp(-_alpha*W_D) * (1 - np.exp(-_alpha*W_U))
+eta_U = _A_U / (_A_U + _A_D)      # 0.708
+eta_D = _A_D / (_A_U + _A_D)      # 0.292
+
+# ── back-compat aliases for reporting/summary code ─────────────────
+W_A_paper, W_C_paper, W_Adep, W_norm = W_U, W_C, W_D, W_T
 
 def H_ph(w):
-    """Rigorous Ramo spatial-average from J_tot = (1/W)∫[J_e+J_h]dx.
+    """Exact paper MUTC photocurrent transfer function H_MUTC(ω).
 
-    tau_A (diffusion pole) applies ONLY to undep-absorber-generated electrons
-    (terms ① ②). Depleted-absorber carriers are generated in situ inside the
-    field, so they carry NO diffusion delay (terms ③ ④).
+    τ_A (diffusion pole) multiplies ONLY the undep-absorber-generated group
+    (bracket 1). Depleted-absorber carriers are generated in-situ (bracket 2,
+    no τ_A) with uniform-generation *triangular* transit transfer functions.
     """
     sinc = lambda x: np.sinc(x/np.pi)
-    # ① undep-absorber electron, diffusion + dielectric-relaxation shape
-    e_diff        = W_A_paper * (2.0 + 1j*w*tau_R) / (2.0*(1.0 + 1j*w*tau_R)) \
-                    / (1.0 + 1j*w*tau_A)
-    # ② same electron then drifting the full depleted region (still τ_A-delayed)
-    e_drift_undep = W_C_paper * sinc(w*tau_C/2) * np.exp(-1j*w*tau_C/2) \
-                    / (1.0 + 1j*w*tau_A)
-    # ③ in-situ depleted-absorber electron (no τ_A)
-    e_drift_dep   = W_Adep * sinc(w*tau_e_ds/2) * np.exp(-1j*w*tau_e_ds/2)
-    # ④ in-situ depleted-absorber hole (no τ_A)
-    h_drift_dep   = W_Adep * sinc(w*tau_h/2) * np.exp(-1j*w*tau_h/2)
-    return (e_diff + e_drift_undep + e_drift_dep + h_drift_dep) / W_norm
+    D = lambda tau: sinc(w*tau/2) * np.exp(-1j*w*tau/2)          # rectangular transit
+    def Tri(tau):                                                # uniform-gen triangular
+        x = 1j*w*tau
+        with np.errstate(invalid='ignore', divide='ignore'):
+            val = (1.0 - D(tau))/x
+        return np.where(np.abs(x) < 1e-12, 0.5 + 0j, val)
+    casc = sinc(w*tau_C/2) * np.exp(-1j*w*(tau_eD + tau_C/2))    # collector w/ dep-abs delay
+    b1 = ( W_U*(2.0 + 1j*w*tau_R)/(2.0*(1.0 + 1j*w*tau_R))
+         + W_D*D(tau_eD)
+         + W_C*casc )
+    b1 = b1 * eta_U / (W_T*(1.0 + 1j*w*tau_A))
+    b2 = ( W_U*D(tau_h)
+         + W_D*Tri(tau_eD)
+         + W_D*Tri(tau_h)
+         + W_C*sinc(w*tau_eD/2)*casc )
+    b2 = b2 * eta_D / W_T
+    return b1 + b2
 
 # ═══════════════════════════════════════════════════════════════════
 # 2. CIRCUIT (LOCKED)
@@ -169,11 +192,11 @@ f_plot = np.linspace(0.1e9, 50e9, 5000); w_plot = 2*np.pi*f_plot
 print('='*100)
 print('UTC-PD 30 μm FINAL  (locked baseline)')
 print('-'*100)
-print(f'  H_ph: rigorous Ramo J_tot integral  W_A={W_A_paper*1e9:.0f} nm, '
-      f'W_C={W_C_paper*1e9:.0f} nm, W_Ad={W_Adep*1e9:.0f} nm  (undep e: τ_A pole; dep e/h: in-situ)')
+print(f'  H_ph: exact paper H_MUTC  W_U={W_U*1e9:.0f} nm, '
+      f'W_D={W_D*1e9:.0f} nm, W_C={W_C*1e9:.0f} nm  (η_U={eta_U:.3f}, η_D={eta_D:.3f}, back-side illum.)')
 print(f'        τ_A={tau_A*1e12:.3f} ps  (undep-abs diffusion pole)')
-print(f'        τ_C={tau_C*1e12:.3f} ps  (v(E) integral, Lumerical -7V 1.5mA)')
-print(f'        τ_eds={tau_e_ds*1e12:.3f} ps  (in-situ dep-abs electron)')
+print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep-abs electron, v(E))')
+print(f'        τ_C={tau_C*1e12:.3f} ps  (collector-only electron, v(E))')
 print(f'        τ_R={tau_R*1e12:.3f} ps  (dielectric relaxation)')
 print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, backward drift)')
 _wtr = 2*np.pi*np.linspace(1e9,200e9,400000)
@@ -342,12 +365,11 @@ for cfg in configs:
 # Summary
 with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
     f.write(f'# Final baseline (locked)\n')
-    f.write(f'# H_ph: rigorous Ramo J_tot integral (undep e w/ tau_A; dep-abs e/h in-situ)  '
-            f'W_A={W_A_paper*1e9:.0f} nm  '
-            f'W_C={W_C_paper*1e9:.0f} nm  W_Ad={W_Adep*1e9:.0f} nm  W_norm={W_norm*1e9:.0f} nm\n')
-    f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_eds={tau_e_ds*1e12:.3f} ps  '
-            f'tau_R={tau_R*1e12:.3f} ps  tau_h={tau_h*1e12:.3f} ps  |  f_tr=30.46 GHz\n')
+    f.write(f'# H_ph: exact paper H_MUTC (eta-weighted, uniform-gen triangular dep-abs)  '
+            f'W_U={W_U*1e9:.0f} nm  W_D={W_D*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  W_T={W_T*1e9:.0f} nm  '
+            f'eta_U={eta_U:.3f} eta_D={eta_D:.3f} (back-side illum.)\n')
+    f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
+            f'tau_R={tau_R*1e12:.3f} ps  tau_h={tau_h*1e12:.3f} ps  |  f_tr=31.53 GHz\n')
     f.write(f'# Circuit:  Cj={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')

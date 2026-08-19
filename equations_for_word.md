@@ -1,52 +1,45 @@
 # UTC-PD Model Equations (Baseline)
 
-## 1. Photocurrent transfer function — rigorous Ramo $J_\mathrm{tot}$ integral
+## 1. Photocurrent transfer function — MUTC model $H_\mathrm{MUTC}(\omega)$
 
 $$
-H_\mathrm{ph}(\omega) = \frac{1}{W_\mathrm{norm}}\Big[ H_1 + H_2 + H_3 + H_4 \Big]
-$$
-
-Term 1 — undepleted-absorber electron (diffusion; carries $\tau_A$):
-
-$$
-H_1 = \frac{W_A}{1+j\omega\tau_A}\cdot\frac{2+j\omega\tau_R}{2\,(1+j\omega\tau_R)}
-$$
-
-Term 2 — the same electron drifting the depleted region (carries $\tau_A$):
-
-$$
-H_2 = \frac{W_C}{1+j\omega\tau_A}\,\mathrm{sinc}\!\left(\frac{\omega\tau_C}{2}\right)e^{-j\omega\tau_C/2}
-$$
-
-Term 3 — depleted-absorber in-situ electron (no $\tau_A$):
-
-$$
-H_3 = W_{Ad}\,\mathrm{sinc}\!\left(\frac{\omega\tau_{eD}}{2}\right)e^{-j\omega\tau_{eD}/2}
-$$
-
-Term 4 — depleted-absorber in-situ hole (no $\tau_A$):
-
-$$
-H_4 = W_{Ad}\,\mathrm{sinc}\!\left(\frac{\omega\tau_h}{2}\right)e^{-j\omega\tau_h/2}
-$$
-
-with
-
-$$
-W_\mathrm{norm} = W_A + W_C + 2\,W_{Ad}, \qquad \mathrm{sinc}(x) = \frac{\sin x}{x}
-$$
-
-## 2. Transit times
-
-$$
-\tau_A = \frac{W_A^{\,2}}{D_e\left(3+\ln\frac{p_\mathrm{max}}{p_\mathrm{min}}\right)}, \qquad
-\tau_C = \int_{W_C}\frac{dz}{v_e\big(E(z)\big)}, \qquad
-\tau_{eD} = \tau_{gcc} + \tfrac{1}{2}\,\tau_{dep}
+H_\mathrm{MUTC}(\omega) = \frac{\eta_U}{W_T(1+j\omega\tau_A)}\left[
+W_U\,\frac{2+j\omega\tau_R}{2(1+j\omega\tau_R)}
++ W_D\,\mathrm{sinc}\!\left(\frac{\omega\tau_{eD}}{2}\right)e^{-j\omega\tau_{eD}/2}
++ W_C\,\mathrm{sinc}\!\left(\frac{\omega\tau_C}{2}\right)e^{-j\omega(\tau_{eD}+\tau_C/2)}
+\right]
 $$
 
 $$
-\tau_h = \frac{W_{Ad}}{v_h}, \qquad
-\tau_R = \frac{\varepsilon}{\sigma}
++\ \frac{\eta_D}{W_T}\left[
+W_U\,\mathrm{sinc}\!\left(\frac{\omega\tau_h}{2}\right)e^{-j\omega\tau_h/2}
++ \frac{W_D}{j\omega\tau_{eD}}\left\{1-\mathrm{sinc}\!\left(\frac{\omega\tau_{eD}}{2}\right)e^{-j\omega\tau_{eD}/2}\right\}
+\right.
+$$
+
+$$
+\left.
++ \frac{W_D}{j\omega\tau_h}\left\{1-\mathrm{sinc}\!\left(\frac{\omega\tau_h}{2}\right)e^{-j\omega\tau_h/2}\right\}
++ W_C\,\mathrm{sinc}\!\left(\frac{\omega\tau_{eD}}{2}\right)\mathrm{sinc}\!\left(\frac{\omega\tau_C}{2}\right)e^{-j\omega(\tau_{eD}+\tau_C/2)}
+\right]
+$$
+
+with $W_T = W_U + W_D + W_C$, $\ \eta_U + \eta_D = 1$, and $\mathrm{sinc}(x)=\dfrac{\sin x}{x}$.
+
+The first bracket ($\eta_U$) is the undepleted-absorber-generated group and carries the diffusion pole $1/(1+j\omega\tau_A)$; the second bracket ($\eta_D$) is the depleted-absorber in-situ group (electron + hole, uniform-generation triangular transit) and carries no $\tau_A$.
+
+## 2. Transit times and generation fractions
+
+$$
+\tau_A = \frac{W_U^{\,2}}{D_e\left(3+\ln\frac{p_\mathrm{max}}{p_\mathrm{min}}\right)}, \qquad
+\tau_{eD} = \int_{W_D}\frac{dz}{v_e\big(E(z)\big)}, \qquad
+\tau_C = \int_{W_C}\frac{dz}{v_e\big(E(z)\big)}
+$$
+
+$$
+\tau_h = \frac{W_D}{v_h}, \qquad
+\tau_R = \frac{\varepsilon}{\sigma}, \qquad
+\eta_U = \frac{A_U}{A_U+A_D}, \quad \eta_D = \frac{A_D}{A_U+A_D}
 $$
 
 ## 3. Circuit model
