@@ -23,9 +23,9 @@ import matplotlib.pyplot as plt
 # ═══════════════════════════════════════════════════════════════════
 W_U = 480e-9; W_D = 240e-9; W_C = 740e-9; W_T = W_U + W_D + W_C   # 1460 nm
 tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth calc
-# transit times from SATURATION velocities (τ_A kept, others = W/v_sat):
-tau_eD = W_D / 8.94e4                             # 2.685 ps (InGaAs e sat 0.89e7 cm/s)
-tau_C  = W_C / 1.076e5                            # 6.877 ps (InP e sat 1.08e7 cm/s)
+# transit times by LAYER-AVERAGE v(E_avg) from device field (-7V,0.5mA,lat10um):
+tau_eD = 3.039e-12                                # dep-abs e (E_avg=179 kV/cm, InGaAs)
+tau_C  = 6.994e-12                                # collector e (E_avg=27 kV/cm, InP)
 tau_h  = W_D / 4.8e4                              # 5.00 ps  (InGaAs h sat 0.48e7 cm/s, lit.)
 eta_U = W_U/(W_U + W_D); eta_D = W_D/(W_U + W_D)  # uniform gen: 0.6667 / 0.3333
 

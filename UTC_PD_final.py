@@ -23,15 +23,15 @@ Locked framework:
   Generation fractions (uniform optical generation over absorbers):
     η_U = W_U/(W_U+W_D) = 0.6667   η_D = W_D/(W_U+W_D) = 0.3333
 
-  Transit times (τ = W / v_sat; v_sat from material v(E) plateau; τ_A NOT recomputed):
-    Device field (-7 V) validates v_sat: drift region 150-180 kV/cm >> onset ~40 kV/cm.
+  Transit times (LAYER-AVERAGE:  τ = W / v(E_avg); τ_A NOT recomputed):
+    E_avg from device field (Lumerical -7 V, 0.5 mA, lat 10 um); v(E_avg) from v(E) curve.
     τ_A   = 3.530 ps   (undep-abs diffusion:  W_U^2 / [D_e (3 + ln(p_max/p_min))])
-    τ_eD  = 2.685 ps   (dep-abs electron,  W_D/v_eD,sat, v_eD,sat=0.89e7 cm/s InGaAs)
-    τ_C   = 6.877 ps   (collector electron, W_C/v_C,sat,  v_C,sat =1.08e7 cm/s InP)
-    τ_h   = 5.000 ps   (dep-abs hole,       W_D/v_h,sat,  v_h,sat =0.48e7 cm/s InGaAs, lit.)
+    τ_eD  = 3.039 ps   (dep-abs e, E_avg=179 kV/cm -> InGaAs v=0.79e7 cm/s)
+    τ_C   = 6.994 ps   (collector e, E_avg=27 kV/cm -> InP v=1.06e7 cm/s)
+    τ_h   = 5.000 ps   (dep-abs hole, W_D/v_h,sat, v_h,sat=0.48e7 cm/s InGaAs, lit.)
     τ_R   = neglected in bandwidth calculation
 
-  Transit-time-limited f_tr = 31.92 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 30.74 GHz  (|H_ph| = -3 dB)
 
   Circuit (S11-fitted):
     Cj    = 131.0 fF   (common, S11-only fit)
@@ -73,19 +73,19 @@ W_D = 240e-9             # depleted InGaAs absorber        (in-situ e/h generati
 W_C = 740e-9             # electron-only collector (InP)
 W_T = W_U + W_D + W_C    # 1460 nm  total transport thickness
 
-# Transit times from SATURATION-velocity crossing: τ = W / v_sat.
-# Saturation velocities are taken from the high-field PLATEAU of the material
-# v(E) curves (NOT integrated over the device field). The device E-field only
-# validates the assumption: drift-region fields (150-180 kV/cm) >> saturation
-# onset (~40 kV/cm), so carriers are at v_sat throughout. (τ_A NOT recomputed.)
-v_eD_sat = 8.94e4        # m/s  InGaAs electron saturation (0.89e7 cm/s, v(E) plateau)
-v_C_sat  = 1.076e5       # m/s  InP    electron saturation (1.08e7 cm/s, v(E) plateau)
+# Electron drift transit times by the LAYER-AVERAGE method: τ = W / v(E_avg),
+# where E_avg = mean |E| over the layer from the DEVICE field (Lumerical CHARGE,
+# -7 V, Iph=0.5 mA, lateral 10 um) and v(E_avg) from the material v(E) curve.
+# Averaging the field first is dip-robust (a thin low-field patch cannot dominate).
+# See tau_layer_avg_compute.py for the reproducible calculation. (τ_A NOT recomputed.)
+#   dep-abs  W_D (z=0.74-0.98): E_avg=179.1 kV/cm, InGaAs v=0.79e5 m/s -> 3.039 ps
+#   collector W_C (z=0-0.74):   E_avg= 27.2 kV/cm, InP    v=1.06e5 m/s -> 6.994 ps
 v_h_InGaAs = 4.8e4       # m/s  InGaAs hole  saturation      (0.48e7 cm/s, literature)
 tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field) — KEPT
 tau_R  = 0.0            # dielectric relaxation — NEGLECTED in bandwidth calc
-tau_eD = W_D / v_eD_sat  # 2.685 ps  dep-absorber electron
-tau_C  = W_C / v_C_sat   # 6.877 ps  collector electron
-tau_h  = W_D / v_h_InGaAs   # 5.00 ps  depleted-absorber hole
+tau_eD = 3.039e-12       # dep-absorber electron   (layer-average v(E_avg), new field)
+tau_C  = 6.994e-12       # collector electron      (layer-average v(E_avg), new field)
+tau_h  = W_D / v_h_InGaAs   # 5.00 ps  depleted-absorber hole (saturation)
 
 # Generation fractions — uniform optical generation over the absorbers:
 eta_U = W_U / (W_U + W_D)     # 0.6667
@@ -198,8 +198,8 @@ print('-'*100)
 print(f'  H_ph: exact paper H_MUTC  W_U={W_U*1e9:.0f} nm, '
       f'W_D={W_D*1e9:.0f} nm, W_C={W_C*1e9:.0f} nm  (η_U={eta_U:.4f}, η_D={eta_D:.4f}, uniform gen.)')
 print(f'        τ_A={tau_A*1e12:.3f} ps  (undep-abs diffusion pole)')
-print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep-abs electron, W_D/v_eD,sat)')
-print(f'        τ_C={tau_C*1e12:.3f} ps  (collector electron, W_C/v_C,sat)')
+print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep-abs electron, layer-avg v(E_avg))')
+print(f'        τ_C={tau_C*1e12:.3f} ps  (collector electron, layer-avg v(E_avg))')
 print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, W_D/v_h,sat)')
 print(f'        τ_R neglected in bandwidth calc')
 _wtr = 2*np.pi*np.linspace(1e9,200e9,400000)
@@ -372,7 +372,7 @@ with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
             f'W_U={W_U*1e9:.0f} nm  W_D={W_D*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  W_T={W_T*1e9:.0f} nm  '
             f'eta_U={eta_U:.4f} eta_D={eta_D:.4f} (uniform generation)\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_h={tau_h*1e12:.3f} ps  (sat vel; tau_R neglected)  |  f_tr=31.92 GHz\n')
+            f'tau_h={tau_h*1e12:.3f} ps  (layer-avg v(E); tau_R neglected)  |  f_tr=30.74 GHz\n')
     f.write(f'# Circuit:  Cj={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')

@@ -1,9 +1,9 @@
 # Final baseline (locked)
 # H_ph: exact paper H_MUTC (eta-weighted, uniform-gen triangular dep-abs)  W_U=480 nm  W_D=240 nm  W_C=740 nm  W_T=1460 nm  eta_U=0.6667 eta_D=0.3333 (uniform generation)
-#   tau_A=3.530 ps  tau_eD=2.685 ps  tau_C=6.877 ps  tau_h=5.000 ps  (sat vel; tau_R neglected)  |  f_tr=31.92 GHz
+#   tau_A=3.530 ps  tau_eD=3.039 ps  tau_C=6.994 ps  tau_h=5.000 ps  (layer-avg v(E); tau_R neglected)  |  f_tr=30.74 GHz
 # Circuit:  Cj=131.00 fF  Rs=8.92 ohm  C_CPW=46.53 fF
 Device	L_CPW_pH	L_CPW2_pH	L_Rp_pH	Cj_fF	Rs_ohm	RMS_S11	BW_GHz	RMS_H_dB
-Rp=200Ω	197.9000	0.0000	153.7000	131.0000	8.9200	0.07243	20.0939	0.6067
-Rp=38Ω	141.6000	56.3000	65.6000	131.0000	8.9200	0.06011	30.7048	0.4702
-Rp=60Ω	149.9000	48.0000	71.8000	131.0000	8.9200	0.06279	25.8036	0.7487
-Open	197.9000	0.0000	0.0000	131.0000	8.9200	0.07584	18.4369	0.8090
+Rp=200Ω	197.9000	0.0000	153.7000	131.0000	8.9200	0.07243	19.8444	0.5966
+Rp=38Ω	141.6000	56.3000	65.6000	131.0000	8.9200	0.06011	29.9562	0.5461
+Rp=60Ω	149.9000	48.0000	71.8000	131.0000	8.9200	0.06279	25.3045	0.8305
+Open	197.9000	0.0000	0.0000	131.0000	8.9200	0.07584	18.2473	0.8657
