@@ -16,21 +16,21 @@ Locked framework:
 
   Region split (each width counted once; W_T = W_U+W_D+W_C):
     W_U = 480 nm  (undep absorber, p+ InGaAs, diff + quasi-field)
-    W_D = 160 nm  (depleted absorber, in-situ e/h generation)
-    W_C = 820 nm  (electron-only collector: grading + cliff + collector)
+    W_D = 240 nm  (depleted InGaAs absorber, in-situ e/h generation)
+    W_C = 740 nm  (electron-only collector, InP)
     W_T = 1460 nm
 
-  Generation fractions (Beer-Lambert, back-side illum., α=0.68/μm InGaAs):
-    η_U = 0.708   η_D = 0.292   (η_U + η_D = 1)
+  Generation fractions (uniform optical generation over absorbers):
+    η_U = W_U/(W_U+W_D) = 0.6667   η_D = W_D/(W_U+W_D) = 0.3333
 
-  Transit times:
+  Transit times (τ = W / v_sat, saturation-velocity crossing):
     τ_A   = 3.530 ps   (undep-abs diffusion:  W_U^2 / [D_e (3 + ln(p_max/p_min))])
-    τ_eD  = 2.026 ps   (dep-abs electron, v(E) integral over 160 nm)
-    τ_C   = 7.295 ps   (collector-only electron, v(E) integral over 820 nm)
-    τ_R   = 0.070 ps   (dielectric relaxation, p~1e18 InGaAs)
-    τ_h   = 3.556 ps   (depleted-absorber hole, W_D / v_h, v_h=4.5e4 m/s)
+    τ_eD  = 1.143 ps   (dep-abs electron,  W_D/v_eD,sat, v_eD,sat=2.1e5 m/s)
+    τ_C   = 1.850 ps   (collector electron, W_C/v_C,sat,  v_C,sat =4.0e5 m/s)
+    τ_h   = 9.600 ps   (dep-abs hole,       W_D/v_h,sat,  v_h,sat =2.5e4 m/s)
+    τ_R   = neglected in bandwidth calculation
 
-  Transit-time-limited f_tr = 31.53 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 45.91 GHz  (|H_ph| = -3 dB)
 
   Circuit (S11-fitted):
     Cj    = 131.0 fF   (common, S11-only fit)
@@ -67,26 +67,22 @@ import matplotlib.pyplot as plt
 #       + (W_D/jωτ_h )·{1-D(τ_h )}                       hole, uniform-gen triangular
 #       + W_C·sinc(ωτ_eD/2)·sinc(ωτ_C/2)·exp(-jω(τ_eD+τ_C/2))   e→collector
 #   with D(τ)=sinc(ωτ/2)·exp(-jωτ/2),  sinc(x)=sin(x)/x.
-W_U = 480e-9              # undepleted p-InGaAs absorber   (diffusion, quasi-field)
-W_D = 160e-9             # depleted InGaAs absorber        (in-situ e/h generation)
-W_C = 820e-9             # electron-only collector         (grading 30 + cliff 50 + collector 740)
+W_U = 480e-9             # undepleted p-InGaAs absorber   (diffusion, quasi-field)
+W_D = 240e-9             # depleted InGaAs absorber        (in-situ e/h generation)
+W_C = 740e-9             # electron-only collector (InP)
 W_T = W_U + W_D + W_C    # 1460 nm  total transport thickness
 
+# Transit times from saturation-velocity crossing: τ = W / v_sat
 tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field)
-tau_R  = 0.070e-12       # dielectric relaxation, p+ InGaAs
-tau_eD = 2.026e-12       # depleted-absorber electron transit  (v(E) integral, 160 nm)
-tau_C  = 7.295e-12       # collector-only electron transit     (v(E) integral, 820 nm)
-v_h_InGaAs = 4.5e4       # m/s  hole saturation velocity, InGaAs
-tau_h  = W_D / v_h_InGaAs   # 3.556 ps  depleted-absorber hole transit
+tau_R  = 0.0            # dielectric relaxation — NEGLECTED in bandwidth calc
+tau_eD = 1.143e-12       # dep-absorber electron  = W_D/v_eD,sat  (v_eD,sat=2.1e5 m/s)
+tau_C  = 1.850e-12       # collector electron     = W_C/v_C,sat   (v_C,sat =4.0e5 m/s)
+v_h_InGaAs = 2.5e4       # m/s  hole saturation velocity, InGaAs
+tau_h  = W_D / v_h_InGaAs   # 9.60 ps  = W_D/v_h,sat   depleted-absorber hole transit
 
-# Generation fractions η_U, η_D via Beer-Lambert (back-side / substrate
-# illumination: light reaches the depleted absorber first, then the
-# undepleted absorber). InGaAs absorption α at 1.55 μm; InP transparent.
-_alpha = 0.68e6          # 1/m
-_A_D = 1 - np.exp(-_alpha*W_D)
-_A_U = np.exp(-_alpha*W_D) * (1 - np.exp(-_alpha*W_U))
-eta_U = _A_U / (_A_U + _A_D)      # 0.708
-eta_D = _A_D / (_A_U + _A_D)      # 0.292
+# Generation fractions — uniform optical generation over the absorbers:
+eta_U = W_U / (W_U + W_D)     # 0.6667
+eta_D = W_D / (W_U + W_D)     # 0.3333
 
 # ── back-compat aliases for reporting/summary code ─────────────────
 W_A_paper, W_C_paper, W_Adep, W_norm = W_U, W_C, W_D, W_T
@@ -193,12 +189,12 @@ print('='*100)
 print('UTC-PD 30 μm FINAL  (locked baseline)')
 print('-'*100)
 print(f'  H_ph: exact paper H_MUTC  W_U={W_U*1e9:.0f} nm, '
-      f'W_D={W_D*1e9:.0f} nm, W_C={W_C*1e9:.0f} nm  (η_U={eta_U:.3f}, η_D={eta_D:.3f}, back-side illum.)')
+      f'W_D={W_D*1e9:.0f} nm, W_C={W_C*1e9:.0f} nm  (η_U={eta_U:.4f}, η_D={eta_D:.4f}, uniform gen.)')
 print(f'        τ_A={tau_A*1e12:.3f} ps  (undep-abs diffusion pole)')
-print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep-abs electron, v(E))')
-print(f'        τ_C={tau_C*1e12:.3f} ps  (collector-only electron, v(E))')
-print(f'        τ_R={tau_R*1e12:.3f} ps  (dielectric relaxation)')
-print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, backward drift)')
+print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep-abs electron, W_D/v_sat)')
+print(f'        τ_C={tau_C*1e12:.3f} ps  (collector electron, W_C/v_sat)')
+print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, W_D/v_sat)')
+print(f'        τ_R neglected in bandwidth calc')
 _wtr = 2*np.pi*np.linspace(1e9,200e9,400000)
 _mtr = np.abs(H_ph(_wtr))/np.abs(H_ph(1e-3*2*np.pi))
 _itr = np.where(_mtr <= 1/np.sqrt(2))[0]
@@ -367,9 +363,9 @@ with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
     f.write(f'# Final baseline (locked)\n')
     f.write(f'# H_ph: exact paper H_MUTC (eta-weighted, uniform-gen triangular dep-abs)  '
             f'W_U={W_U*1e9:.0f} nm  W_D={W_D*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  W_T={W_T*1e9:.0f} nm  '
-            f'eta_U={eta_U:.3f} eta_D={eta_D:.3f} (back-side illum.)\n')
+            f'eta_U={eta_U:.4f} eta_D={eta_D:.4f} (uniform generation)\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_R={tau_R*1e12:.3f} ps  tau_h={tau_h*1e12:.3f} ps  |  f_tr=31.53 GHz\n')
+            f'tau_h={tau_h*1e12:.3f} ps  (tau_R neglected)  |  f_tr=45.91 GHz\n')
     f.write(f'# Circuit:  Cj={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')

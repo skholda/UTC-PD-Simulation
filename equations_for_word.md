@@ -30,16 +30,25 @@ The first bracket ($\eta_U$) is the undepleted-absorber-generated group and carr
 
 ## 2. Transit times and generation fractions
 
-$$
-\tau_A = \frac{W_U^{\,2}}{D_e\left(3+\ln\frac{p_\mathrm{max}}{p_\mathrm{min}}\right)}, \qquad
-\tau_{eD} = \int_{W_D}\frac{dz}{v_e\big(E(z)\big)}, \qquad
-\tau_C = \int_{W_C}\frac{dz}{v_e\big(E(z)\big)}
-$$
+Transit times from saturation-velocity crossing:
 
 $$
-\tau_h = \frac{W_D}{v_h}, \qquad
-\tau_R = \frac{\varepsilon}{\sigma}, \qquad
-\eta_U = \frac{A_U}{A_U+A_D}, \quad \eta_D = \frac{A_D}{A_U+A_D}
+\tau_{eD} = \frac{W_D}{v_{eD,\mathrm{sat}}}, \qquad
+\tau_h = \frac{W_D}{v_{h,\mathrm{sat}}}, \qquad
+\tau_C = \frac{W_C}{v_{C,\mathrm{sat}}}
+$$
+
+Undepleted-absorber effective transit (diffusion + quasi-field); $\tau_R$ is neglected in the bandwidth calculation:
+
+$$
+\tau_A = \frac{W_U^{\,2}}{D_e\left(3+\ln\frac{p_\mathrm{max}}{p_\mathrm{min}}\right)}
+$$
+
+Generation fractions (uniform optical generation over the absorbers):
+
+$$
+\eta_U = \frac{W_U}{W_U+W_D}, \qquad
+\eta_D = \frac{W_D}{W_U+W_D}
 $$
 
 ## 3. Circuit model

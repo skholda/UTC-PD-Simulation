@@ -21,14 +21,11 @@ import matplotlib.pyplot as plt
 # ═══════════════════════════════════════════════════════════════════
 # 1. H_ph(ω) — exact paper H_MUTC (SAME as -7 V baseline, bias-independent)
 # ═══════════════════════════════════════════════════════════════════
-W_U = 480e-9; W_D = 160e-9; W_C = 820e-9; W_T = W_U + W_D + W_C   # 1460 nm
-tau_A = 3.530e-12; tau_R = 0.070e-12
-tau_eD = 2.026e-12; tau_C = 7.295e-12
-tau_h = W_D / 4.5e4                               # 3.556 ps
-_alpha = 0.68e6                                   # back-side illumination (dep abs first)
-_A_D = 1 - np.exp(-_alpha*W_D)
-_A_U = np.exp(-_alpha*W_D) * (1 - np.exp(-_alpha*W_U))
-eta_U = _A_U/(_A_U + _A_D); eta_D = _A_D/(_A_U + _A_D)   # 0.708 / 0.292
+W_U = 480e-9; W_D = 240e-9; W_C = 740e-9; W_T = W_U + W_D + W_C   # 1460 nm
+tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth calc
+tau_eD = 1.143e-12; tau_C = 1.850e-12             # W/v_sat (v_eD=2.1e5, v_C=4.0e5 m/s)
+tau_h = W_D / 2.5e4                               # 9.60 ps  = W_D/v_h,sat
+eta_U = W_U/(W_U + W_D); eta_D = W_D/(W_U + W_D)  # uniform gen: 0.6667 / 0.3333
 
 def H_ph(w):
     sinc = lambda x: np.sinc(x/np.pi)
