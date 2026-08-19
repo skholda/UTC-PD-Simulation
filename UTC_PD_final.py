@@ -23,14 +23,14 @@ Locked framework:
   Generation fractions (uniform optical generation over absorbers):
     η_U = W_U/(W_U+W_D) = 0.6667   η_D = W_D/(W_U+W_D) = 0.3333
 
-  Transit times (τ = W / v_sat, saturation-velocity crossing):
+  Transit times (τ = W / v_sat, SATURATION-velocity crossing; τ_A NOT recomputed):
     τ_A   = 3.530 ps   (undep-abs diffusion:  W_U^2 / [D_e (3 + ln(p_max/p_min))])
-    τ_eD  = 1.143 ps   (dep-abs electron,  W_D/v_eD,sat, v_eD,sat=2.1e5 m/s)
-    τ_C   = 1.850 ps   (collector electron, W_C/v_C,sat,  v_C,sat =4.0e5 m/s)
-    τ_h   = 9.600 ps   (dep-abs hole,       W_D/v_h,sat,  v_h,sat =2.5e4 m/s)
+    τ_eD  = 2.685 ps   (dep-abs electron,  W_D/v_eD,sat, v_eD,sat=0.89e7 cm/s InGaAs)
+    τ_C   = 6.877 ps   (collector electron, W_C/v_C,sat,  v_C,sat =1.08e7 cm/s InP)
+    τ_h   = 9.600 ps   (dep-abs hole,       W_D/v_h,sat,  v_h,sat =0.25e7 cm/s InGaAs)
     τ_R   = neglected in bandwidth calculation
 
-  Transit-time-limited f_tr = 45.91 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 32.64 GHz  (|H_ph| = -3 dB)
 
   Circuit (S11-fitted):
     Cj    = 131.0 fF   (common, S11-only fit)
@@ -72,13 +72,17 @@ W_D = 240e-9             # depleted InGaAs absorber        (in-situ e/h generati
 W_C = 740e-9             # electron-only collector (InP)
 W_T = W_U + W_D + W_C    # 1460 nm  total transport thickness
 
-# Transit times from saturation-velocity crossing: τ = W / v_sat
-tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field)
+# Transit times from SATURATION-velocity crossing: τ = W / v_sat
+# (τ_A, the undepleted-absorber diffusion transit, is NOT recomputed here.)
+# Saturation velocities from the high-field plateau of the material v(E) curves:
+v_eD_sat = 8.94e4        # m/s  InGaAs electron saturation (0.89e7 cm/s)
+v_C_sat  = 1.076e5       # m/s  InP    electron saturation (1.08e7 cm/s)
+v_h_InGaAs = 2.5e4       # m/s  InGaAs hole  saturation      (0.25e7 cm/s)
+tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field) — KEPT
 tau_R  = 0.0            # dielectric relaxation — NEGLECTED in bandwidth calc
-tau_eD = 1.143e-12       # dep-absorber electron  = W_D/v_eD,sat  (v_eD,sat=2.1e5 m/s)
-tau_C  = 1.850e-12       # collector electron     = W_C/v_C,sat   (v_C,sat =4.0e5 m/s)
-v_h_InGaAs = 2.5e4       # m/s  hole saturation velocity, InGaAs
-tau_h  = W_D / v_h_InGaAs   # 9.60 ps  = W_D/v_h,sat   depleted-absorber hole transit
+tau_eD = W_D / v_eD_sat  # 2.685 ps  dep-absorber electron
+tau_C  = W_C / v_C_sat   # 6.877 ps  collector electron
+tau_h  = W_D / v_h_InGaAs   # 9.60 ps  depleted-absorber hole
 
 # Generation fractions — uniform optical generation over the absorbers:
 eta_U = W_U / (W_U + W_D)     # 0.6667
@@ -365,7 +369,7 @@ with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
             f'W_U={W_U*1e9:.0f} nm  W_D={W_D*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  W_T={W_T*1e9:.0f} nm  '
             f'eta_U={eta_U:.4f} eta_D={eta_D:.4f} (uniform generation)\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_h={tau_h*1e12:.3f} ps  (tau_R neglected)  |  f_tr=45.91 GHz\n')
+            f'tau_h={tau_h*1e12:.3f} ps  (sat vel; tau_R neglected)  |  f_tr=32.64 GHz\n')
     f.write(f'# Circuit:  Cj={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')

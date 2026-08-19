@@ -23,8 +23,10 @@ import matplotlib.pyplot as plt
 # ═══════════════════════════════════════════════════════════════════
 W_U = 480e-9; W_D = 240e-9; W_C = 740e-9; W_T = W_U + W_D + W_C   # 1460 nm
 tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth calc
-tau_eD = 1.143e-12; tau_C = 1.850e-12             # W/v_sat (v_eD=2.1e5, v_C=4.0e5 m/s)
-tau_h = W_D / 2.5e4                               # 9.60 ps  = W_D/v_h,sat
+# transit times from SATURATION velocities (τ_A kept, others = W/v_sat):
+tau_eD = W_D / 8.94e4                             # 2.685 ps (InGaAs e sat 0.89e7 cm/s)
+tau_C  = W_C / 1.076e5                            # 6.877 ps (InP e sat 1.08e7 cm/s)
+tau_h  = W_D / 2.5e4                              # 9.60 ps  (InGaAs h sat 0.25e7 cm/s)
 eta_U = W_U/(W_U + W_D); eta_D = W_D/(W_U + W_D)  # uniform gen: 0.6667 / 0.3333
 
 def H_ph(w):
