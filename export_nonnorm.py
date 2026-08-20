@@ -43,9 +43,11 @@ DEV = {
 }
 f_plot = np.linspace(0.1e9, 45e9, 4500); w_plot = 2*np.pi*f_plot
 
-def model_abs(cfg, Cj):
+def model_dBm(cfg, Cj, Iph):
+    # RF power delivered to the load:  P_RF = |Iph*H_ph*H_ckt|^2 / (2 R_L)
     H = H_ph(w_plot)*H_ckt(w_plot, Cj, cfg['Rp'], cfg['Lcpw'], cfg['Lrp'], cfg['Lcpw2'])
-    return 20*np.log10(np.abs(H))          # dB-ohm, absolute (no normalization)
+    P = np.abs(Iph*H)**2/(2*R_L)           # W
+    return 10*np.log10(P/1e-3)             # dBm (absolute, no normalization)
 
 def write(path, header, cols):
     with open(path, 'w', encoding='utf-8') as f:
@@ -67,9 +69,9 @@ os.makedirs('origin_export/minus5V_5mA', exist_ok=True)
 for tag,cfg in DEV.items():
     arr=_ns[map7[tag]]; fm=arr[:,0]; meas_abs=arr[:,1]+np.interp(fm,ref_f,ref_loss)  # dB
     write(f'origin_export/minus7V/freqresp_nonnorm_meas_{tag}.txt',
-          ['Freq_GHz','Meas_abs_dB'], [fm, meas_abs])
+          ['Freq_GHz','Meas_dBm'], [fm, meas_abs])
     write(f'origin_export/minus7V/freqresp_nonnorm_sim_{tag}.txt',
-          ['Freq_GHz','Model_dBohm'], [f_plot/1e9, model_abs(cfg, 131.0e-15)])
+          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 131.0e-15, 1.0e-3)])  # Iph=1 mA
 
 # ── -5 V measured (xlsx, Cal RF dBm) ───────────────────────────────
 map5={'Rp_200ohm':'200ohm','Rp_38ohm':'38ohm','Rp_60ohm':'60ohm','Open':'WO'}
@@ -81,8 +83,8 @@ for tag,cfg in DEV.items():
     write(f'origin_export/minus5V_5mA/freqresp_nonnorm_meas_{tag}.txt',
           ['Freq_GHz','Meas_CalRF_dBm'], [fm, cal])
     write(f'origin_export/minus5V_5mA/freqresp_nonnorm_sim_{tag}.txt',
-          ['Freq_GHz','Model_dBohm'], [f_plot/1e9, model_abs(cfg, 161.0e-15)])
+          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 161.0e-15, 5.0e-3)])  # Iph=5 mA
 
-print('Wrote non-normalized freqresp files:')
-print('  origin_export/minus7V/freqresp_nonnorm_{meas,sim}_*.txt   (meas: dB, model: dB-ohm)')
-print('  origin_export/minus5V_5mA/freqresp_nonnorm_{meas,sim}_*.txt (meas: dBm, model: dB-ohm)')
+print('Wrote non-normalized freqresp files (measured & model both in dBm):')
+print('  origin_export/minus7V/freqresp_nonnorm_{meas,sim}_*.txt   (Iph=1 mA)')
+print('  origin_export/minus5V_5mA/freqresp_nonnorm_{meas,sim}_*.txt (Iph=5 mA)')

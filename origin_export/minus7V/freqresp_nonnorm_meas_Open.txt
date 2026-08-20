@@ -1,4 +1,4 @@
-Freq_GHz	Meas_abs_dB
+Freq_GHz	Meas_dBm
 0.33	-16.26
 0.83	-16.33597
 1.5	-16.36
