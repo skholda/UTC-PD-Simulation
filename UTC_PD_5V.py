@@ -19,30 +19,24 @@ import os, numpy as np, pandas as pd
 import matplotlib.pyplot as plt
 
 # ═══════════════════════════════════════════════════════════════════
-# 1. H_ph(ω) — exact paper H_MUTC (SAME as -7 V baseline, bias-independent)
+# 1. H_ph(ω) — 4-term transit (SAME as -7 V baseline, bias-independent)
 # ═══════════════════════════════════════════════════════════════════
-W_U = 480e-9; W_D = 240e-9; W_C = 740e-9; W_T = W_U + W_D + W_C   # 1460 nm
+W_A = 480e-9; W_Ad = 240e-9; W_C = 740e-9
+W_norm = W_A + W_C + 2*W_Ad                       # 1700 nm  (DC -> |H_ph(0)|=1)
 tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth calc
-# transit times by LAYER-AVERAGE v(E_avg) from device field (-7V,0.5mA,lat10um):
+# layer-average v(E_avg) from device field (-7V,0.5mA,lat10um); τ_A kept:
 tau_eD = 3.039e-12                                # dep-abs e (E_avg=179 kV/cm, InGaAs)
 tau_C  = 6.994e-12                                # collector e (E_avg=27 kV/cm, InP)
-tau_h  = W_D / 4.8e4                              # 5.00 ps  (InGaAs h sat 0.48e7 cm/s, lit.)
-eta_U = W_U/(W_U + W_D); eta_D = W_D/(W_U + W_D)  # uniform gen: 0.6667 / 0.3333
+tau_h  = W_Ad / 4.8e4                             # 5.00 ps  (InGaAs h sat 0.48e7 cm/s, lit.)
 
 def H_ph(w):
+    # 4-term transit: τ_A on undep-absorber terms only; in-situ dep-abs e/h no τ_A.
     sinc = lambda x: np.sinc(x/np.pi)
-    D = lambda tau: sinc(w*tau/2)*np.exp(-1j*w*tau/2)
-    def Tri(tau):
-        x = 1j*w*tau
-        with np.errstate(invalid='ignore', divide='ignore'):
-            val = (1.0 - D(tau))/x
-        return np.where(np.abs(x) < 1e-12, 0.5 + 0j, val)
-    casc = sinc(w*tau_C/2)*np.exp(-1j*w*(tau_eD + tau_C/2))
-    b1 = (W_U*(2.0+1j*w*tau_R)/(2.0*(1.0+1j*w*tau_R)) + W_D*D(tau_eD) + W_C*casc)
-    b1 = b1*eta_U/(W_T*(1.0+1j*w*tau_A))
-    b2 = (W_U*D(tau_h) + W_D*Tri(tau_eD) + W_D*Tri(tau_h) + W_C*sinc(w*tau_eD/2)*casc)
-    b2 = b2*eta_D/W_T
-    return b1 + b2
+    t1 = W_A /(1.0+1j*w*tau_A) * (2.0+1j*w*tau_R)/(2.0*(1.0+1j*w*tau_R))
+    t2 = W_C /(1.0+1j*w*tau_A) * sinc(w*tau_C/2)  * np.exp(-1j*w*tau_C/2)
+    t3 = W_Ad * sinc(w*tau_eD/2) * np.exp(-1j*w*tau_eD/2)
+    t4 = W_Ad * sinc(w*tau_h/2)  * np.exp(-1j*w*tau_h/2)
+    return (t1 + t2 + t3 + t4) / W_norm
 
 # ═══════════════════════════════════════════════════════════════════
 # 2. CIRCUIT — bias-independent params locked; only Cj changes (C-V)
