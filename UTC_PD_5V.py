@@ -21,13 +21,13 @@ import matplotlib.pyplot as plt
 # ═══════════════════════════════════════════════════════════════════
 # 1. H_ph(ω) — 4-term transit (SAME as -7 V baseline, bias-independent)
 # ═══════════════════════════════════════════════════════════════════
-W_A = 480e-9; W_Ad = 240e-9; W_C = 740e-9
-W_norm = W_A + W_C + 2*W_Ad                       # 1700 nm  (DC -> |H_ph(0)|=1)
+W_A = 480e-9; W_Ad = 160e-9; W_C = 820e-9
+W_norm = W_A + W_C + 2*W_Ad                       # 1620 nm  (DC -> |H_ph(0)|=1)
 tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth calc
-# layer-average v(E_avg) from device field (-7V,0.5mA,lat10um); τ_A kept:
-tau_eD = 3.039e-12                                # dep-abs e (E_avg=179 kV/cm, InGaAs)
-tau_C  = 6.994e-12                                # collector e (E_avg=27 kV/cm, InP)
-tau_h  = W_Ad / 4.8e4                             # 5.00 ps  (InGaAs h sat 0.48e7 cm/s, lit.)
+# material-resolved layer-average v(E_avg), device field (-7V,0.5mA,lat10um); τ_A kept:
+tau_eD = 2.026e-12                                # dep InGaAs abs 160 nm (InGaAs)
+tau_C  = 7.794e-12                                # grading(InGaAsP)+cliff(InP)+collector(InP)
+tau_h  = W_Ad / 4.8e4                             # 3.333 ps (InGaAs h sat 0.48e7 cm/s, lit.)
 
 def H_ph(w):
     # 4-term transit: τ_A on undep-absorber terms only; in-situ dep-abs e/h no τ_A.

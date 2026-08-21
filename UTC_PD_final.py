@@ -11,21 +11,21 @@ Locked framework:
     τ_A (diffusion pole) multiplies ONLY the undep-absorber terms; the in-situ
     depleted-absorber electron and hole carry no τ_A.
 
-  Region split:
-    W_A  = 480 nm  (undep absorber, p+ InGaAs, diff + quasi-field)
-    W_Ad = 240 nm  (depleted InGaAs absorber, in-situ e/h generation)
-    W_C  = 740 nm  (electron-only collector, InP)
-    W_norm = W_A + W_C + 2·W_Ad = 1700 nm
+  Region split (grading+cliff belong to the collector stack, not the absorber):
+    W_A  = 480 nm  (undep InGaAs absorber, diff + quasi-field)
+    W_Ad = 160 nm  (depleted InGaAs absorber, in-situ e/h generation; InGaAs only)
+    W_C  = 820 nm  (grading 30 InGaAsP + cliff 50 InP + collector 740 InP)
+    W_norm = W_A + W_C + 2·W_Ad = 1620 nm
 
-  Transit times (LAYER-AVERAGE:  τ = W / v(E_avg); τ_A NOT recomputed):
-    E_avg from device field (Lumerical -7 V, 0.5 mA, lat 10 um); v(E_avg) from v(E) curve.
+  Transit times (MATERIAL-RESOLVED layer-average; each sublayer its own v(E); τ_A kept):
+    E_avg from device field (Lumerical -7 V, 0.5 mA, lat 10 um).
     τ_A   = 3.530 ps   (undep-abs diffusion:  W_A^2 / [D_e (3 + ln(p_max/p_min))])
-    τ_eD  = 3.039 ps   (dep-abs e, E_avg=179 kV/cm -> InGaAs v=0.79e7 cm/s)
-    τ_C   = 6.994 ps   (collector e, E_avg=27 kV/cm -> InP v=1.06e7 cm/s)
-    τ_h   = 5.000 ps   (dep-abs hole, W_Ad/v_h,sat, v_h,sat=0.48e7 cm/s InGaAs, lit.)
+    τ_eD  = 2.026 ps   (dep InGaAs abs 160 nm, InGaAs v=0.79e7 cm/s)
+    τ_C   = 7.794 ps   (grading InGaAsP 0.27 + cliff InP 0.53 + collector InP 6.99)
+    τ_h   = 3.333 ps   (dep-abs hole, W_Ad/v_h,sat, v_h,sat=0.48e7 cm/s InGaAs, lit.)
     τ_R   = neglected in bandwidth calculation
 
-  Transit-time-limited f_tr = 36.92 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 32.62 GHz  (|H_ph| = -3 dB)
 
   Circuit (S11-fitted):
     Cj    = 131.0 fF   (common, S11-only fit)
@@ -58,23 +58,23 @@ import matplotlib.pyplot as plt
 #   with sinc(x)=sin(x)/x and  W_norm = W_A + W_C + 2·W_Ad  (DC -> 1).
 #   τ_A multiplies ONLY the undep-absorber terms; in-situ dep-absorber carriers
 #   (electron & hole) carry no τ_A.
-W_A   = 480e-9           # undepleted p-InGaAs absorber   (diffusion, quasi-field)
-W_Ad  = 240e-9           # depleted InGaAs absorber        (in-situ e/h generation)
-W_C   = 740e-9           # electron-only collector (InP)
-W_norm = W_A + W_C + 2*W_Ad   # 1700 nm  (numerator DC sum -> |H_ph(0)|=1)
+W_A   = 480e-9           # undepleted InGaAs absorber   (diffusion, quasi-field)
+W_Ad  = 160e-9           # depleted InGaAs absorber      (in-situ e/h generation; InGaAs only)
+W_C   = 820e-9           # collector stack: grading 30 + cliff 50 + collector 740 (InP/InGaAsP)
+W_norm = W_A + W_C + 2*W_Ad   # 1620 nm  (numerator DC sum -> |H_ph(0)|=1)
 
-# Electron drift transit times by the LAYER-AVERAGE method: τ = W / v(E_avg),
-# E_avg = mean |E| over the layer from the DEVICE field (Lumerical CHARGE,
-# -7 V, Iph=0.5 mA, lateral 10 um); v(E_avg) from the material v(E) curve.
-# See tau_layer_avg_compute.py.  (τ_A is NOT recomputed.)
-#   dep-abs  W_Ad (z=0.74-0.98): E_avg=179.1 kV/cm, InGaAs v=0.79e7 cm/s -> 3.039 ps
-#   collector W_C  (z=0-0.74):   E_avg= 27.2 kV/cm, InP    v=1.06e7 cm/s -> 6.994 ps
+# Electron drift transit times by the MATERIAL-RESOLVED layer-average method:
+# each sublayer uses its own v(E) curve and its own mean field from the DEVICE
+# field (Lumerical CHARGE, -7 V, Iph=0.5 mA, lat 10 um).  See tau_layer_avg_compute.py.
+#   τ_eD = dep InGaAs abs 160 nm (InGaAs, E_avg=176 kV/cm) -> 2.026 ps
+#   τ_C  = grading 0.136+0.136 (InGaAsP) + cliff 0.527 (InP) + collector 6.994 (InP)
+#          over W_C=820 nm -> 7.794 ps
 v_h_InGaAs = 4.8e4       # m/s  InGaAs hole saturation velocity (0.48e7 cm/s, literature)
 tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field) — KEPT
 tau_R  = 0.0            # dielectric relaxation — NEGLECTED in bandwidth calc
-tau_eD = 3.039e-12       # dep-absorber electron   (layer-average v(E_avg))
-tau_C  = 6.994e-12       # collector electron      (layer-average v(E_avg))
-tau_h  = W_Ad / v_h_InGaAs   # 5.00 ps  depleted-absorber hole (saturation)
+tau_eD = 2.026e-12       # dep-absorber electron   (InGaAs, material-resolved)
+tau_C  = 7.794e-12       # collector-stack electron (grading+cliff+collector, material-resolved)
+tau_h  = W_Ad / v_h_InGaAs   # 3.333 ps  depleted-absorber hole (InGaAs saturation)
 
 # ── aliases for reporting/summary code ─────────────────────────────
 W_U, W_D, W_T = W_A, W_Ad, W_A + W_C + W_Ad
@@ -172,9 +172,9 @@ print('-'*100)
 print(f'  H_ph: 4-term transit  W_A={W_A*1e9:.0f} nm, '
       f'W_C={W_C*1e9:.0f} nm, W_Ad={W_Ad*1e9:.0f} nm  (W_norm=W_A+W_C+2W_Ad={W_norm*1e9:.0f} nm)')
 print(f'        τ_A={tau_A*1e12:.3f} ps  (undep-abs diffusion pole)')
-print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep-abs electron, layer-avg v(E_avg))')
-print(f'        τ_C={tau_C*1e12:.3f} ps  (collector electron, layer-avg v(E_avg))')
-print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, W_D/v_h,sat)')
+print(f'        τ_eD={tau_eD*1e12:.3f} ps  (dep InGaAs abs, material-resolved)')
+print(f'        τ_C={tau_C*1e12:.3f} ps  (grading+cliff+collector, material-resolved)')
+print(f'        τ_h={tau_h*1e12:.3f} ps  (dep-abs hole, W_Ad/v_h,sat)')
 print(f'        τ_R neglected in bandwidth calc')
 _wtr = 2*np.pi*np.linspace(1e9,200e9,400000)
 _mtr = np.abs(H_ph(_wtr))/np.abs(H_ph(1e-3*2*np.pi))
@@ -343,10 +343,10 @@ for cfg in configs:
 with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
     f.write(f'# Final baseline (locked)\n')
     f.write(f'# H_ph: 4-term transit (undep e w/ tau_A; in-situ dep-abs e/h no tau_A)  '
-            f'W_A={W_A*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  W_Ad={W_Adep*1e9:.0f} nm  '
+            f'W_A={W_A*1e9:.0f} nm  W_Ad={W_Adep*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  '
             f'W_norm=W_A+W_C+2W_Ad={W_norm*1e9:.0f} nm\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_h={tau_h*1e12:.3f} ps  (layer-avg v(E); tau_R neglected)  |  f_tr=36.92 GHz\n')
+            f'tau_h={tau_h*1e12:.3f} ps  (material-resolved v(E); tau_R neglected)  |  f_tr=32.62 GHz\n')
     f.write(f'# Circuit:  Cj={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tCj_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')

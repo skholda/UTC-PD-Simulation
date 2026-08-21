@@ -1,9 +1,9 @@
 # Final baseline (locked)
-# H_ph: 4-term transit (undep e w/ tau_A; in-situ dep-abs e/h no tau_A)  W_A=480 nm  W_C=740 nm  W_Ad=240 nm  W_norm=W_A+W_C+2W_Ad=1700 nm
-#   tau_A=3.530 ps  tau_eD=3.039 ps  tau_C=6.994 ps  tau_h=5.000 ps  (layer-avg v(E); tau_R neglected)  |  f_tr=36.92 GHz
+# H_ph: 4-term transit (undep e w/ tau_A; in-situ dep-abs e/h no tau_A)  W_A=480 nm  W_Ad=160 nm  W_C=820 nm  W_norm=W_A+W_C+2W_Ad=1620 nm
+#   tau_A=3.530 ps  tau_eD=2.026 ps  tau_C=7.794 ps  tau_h=3.333 ps  (material-resolved v(E); tau_R neglected)  |  f_tr=32.62 GHz
 # Circuit:  Cj=131.00 fF  Rs=8.92 ohm  C_CPW=46.53 fF
 Device	L_CPW_pH	L_CPW2_pH	L_Rp_pH	Cj_fF	Rs_ohm	RMS_S11	BW_GHz	RMS_H_dB
-Rp=200Ω	197.9000	0.0000	153.7000	131.0000	8.9200	0.07243	20.8925	0.6758
-Rp=38Ω	141.6000	56.3000	65.6000	131.0000	8.9200	0.06011	33.3301	0.4268
-Rp=60Ω	149.9000	48.0000	71.8000	131.0000	8.9200	0.06279	27.5205	0.5238
-Open	197.9000	0.0000	0.0000	131.0000	8.9200	0.07584	19.0558	0.6760
+Rp=200Ω	197.9000	0.0000	153.7000	131.0000	8.9200	0.07243	20.1938	0.6114
+Rp=38Ω	141.6000	56.3000	65.6000	131.0000	8.9200	0.06011	31.1141	0.4409
+Rp=60Ω	149.9000	48.0000	71.8000	131.0000	8.9200	0.06279	26.0432	0.7126
+Open	197.9000	0.0000	0.0000	131.0000	8.9200	0.07584	18.5168	0.7841
