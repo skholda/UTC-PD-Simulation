@@ -25,21 +25,31 @@ def H_ph(w):
     t4 = W_Ad*sinc(w*tau_h/2)*np.exp(-1j*w*tau_h/2)
     return (t1+t2+t3+t4)/W_norm
 
-# ── circuit ────────────────────────────────────────────────────────
+# ── circuit — LADDER topology (baseline) ───────────────────────────
 C_CPW, R_L, Rs = 46.53e-15, 50.0, 8.92
-def _Y_Rp(w, Rp, Lrp):
-    return 0.0 if np.isinf(Rp) else 1.0/(Rp+1j*w*Lrp)
-def H_ckt(w, Cj, Rp, Lcpw, Lrp, Lcpw2):
-    Zs = Rs+1j*w*Lcpw2
-    Y_A = 1j*w*C_CPW+_Y_Rp(w,Rp,Lrp)+1/(1j*w*Lcpw+R_L)
-    return (R_L/(1j*w*Lcpw+R_L))/(1j*w*Cj+Y_A*(1+1j*w*Cj*Zs))
+def H_ckt(w, Cj, Rp, Lcpw1, Lrp, Lcpw2):
+    """Ladder transimpedance V_RL/I_ph via ABCD cascade."""
+    w = np.atleast_1d(np.asarray(w, dtype=float))
+    A = np.ones_like(w, dtype=complex); B = np.zeros_like(w, dtype=complex)
+    C = np.zeros_like(w, dtype=complex); D = np.ones_like(w, dtype=complex)
+    def _series(Z):
+        nonlocal A, B, C, D
+        A, B, C, D = A, A*Z + B, C, C*Z + D
+    def _shunt(Y):
+        nonlocal A, B, C, D
+        A, B, C, D = A + B*Y, B, C + D*Y, D
+    _shunt(1j*w*Cj); _series(Rs + 0j*w); _shunt(1j*w*C_CPW)
+    _series(1j*w*Lcpw1)
+    if not np.isinf(Rp): _shunt(1/(Rp + 1j*w*Lrp))
+    _series(1j*w*Lcpw2)
+    return R_L/(C*R_L + D)
 
-# device L config (common to both biases; bias-independent)
+# device ladder L config (bias-independent, from -7 V ladder fit)
 DEV = {
- 'Rp_200ohm': dict(Rp=200.0, Lcpw=197.9e-12, Lcpw2=0.0,     Lrp=153.7e-12),
- 'Rp_38ohm' : dict(Rp=38.0,  Lcpw=141.6e-12, Lcpw2=56.3e-12,Lrp=65.6e-12),
- 'Rp_60ohm' : dict(Rp=60.0,  Lcpw=149.9e-12, Lcpw2=48.0e-12,Lrp=71.8e-12),
- 'Open'     : dict(Rp=np.inf,Lcpw=197.9e-12, Lcpw2=0.0,     Lrp=0.0),
+ 'Rp_200ohm': dict(Rp=200.0, Lcpw=5.2e-12,   Lcpw2=190.3e-12, Lrp=153.7e-12),
+ 'Rp_38ohm' : dict(Rp=38.0,  Lcpw=37.5e-12,  Lcpw2=146.0e-12, Lrp=65.6e-12),
+ 'Rp_60ohm' : dict(Rp=60.0,  Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
+ 'Open'     : dict(Rp=np.inf,Lcpw=129.4e-12, Lcpw2=54.6e-12,  Lrp=0.0),
 }
 f_plot = np.linspace(0.1e9, 45e9, 4500); w_plot = 2*np.pi*f_plot
 
@@ -71,7 +81,7 @@ for tag,cfg in DEV.items():
     write(f'origin_export/minus7V/freqresp_nonnorm_meas_{tag}.txt',
           ['Freq_GHz','Meas_dBm'], [fm, meas_abs])
     write(f'origin_export/minus7V/freqresp_nonnorm_sim_{tag}.txt',
-          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 131.0e-15, 1.0e-3)])  # Iph=1 mA
+          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 137.0e-15, 1.0e-3)])  # Iph=1 mA
 
 # ── -5 V measured (xlsx, Cal RF dBm) ───────────────────────────────
 map5={'Rp_200ohm':'200ohm','Rp_38ohm':'38ohm','Rp_60ohm':'60ohm','Open':'WO'}
@@ -83,7 +93,7 @@ for tag,cfg in DEV.items():
     write(f'origin_export/minus5V_5mA/freqresp_nonnorm_meas_{tag}.txt',
           ['Freq_GHz','Meas_CalRF_dBm'], [fm, cal])
     write(f'origin_export/minus5V_5mA/freqresp_nonnorm_sim_{tag}.txt',
-          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 161.0e-15, 5.0e-3)])  # Iph=5 mA
+          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 172.0e-15, 5.0e-3)])  # Iph=5 mA
 
 print('Wrote non-normalized freqresp files (measured & model both in dBm):')
 print('  origin_export/minus7V/freqresp_nonnorm_{meas,sim}_*.txt   (Iph=1 mA)')

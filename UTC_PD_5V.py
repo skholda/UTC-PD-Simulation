@@ -3,9 +3,9 @@ UTC-PD 30 μm  —  -5 V / 5 mA simulation  (rigorous H_ph baseline)
 ================================================================
 Same locked framework as UTC_PD_final.py (-7 V), with the ONLY bias-dependent
 change being the junction capacitance (C-V):
-    Cj(-7 V) = 131 fF   ->   Cj(-5 V) = 161 fF
+    C_PD(-7 V) = 137 fF   ->   C_PD(-5 V) = 172 fF   (ladder topology)
 Inductances are geometric (bias-independent): L_total, L_CPW2, FEM L_Rp reused
-from the -7 V Option-B fit AS-IS. Rs, C_CPW bias-independent.
+from the -7 V ladder fit AS-IS. Rs, C_CPW bias-independent.
 
 H_ph: identical rigorous Ramo J_tot integral as the -7 V baseline
       (undep-abs electron carries τ_A; dep-abs in-situ e/h carry none).
@@ -39,43 +39,61 @@ def H_ph(w):
     return (t1 + t2 + t3 + t4) / W_norm
 
 # ═══════════════════════════════════════════════════════════════════
-# 2. CIRCUIT — bias-independent params locked; only Cj changes (C-V)
+# 2. CIRCUIT — LADDER topology; bias-independent params locked; only C_PD
+#    changes with bias (C-V):  137 fF @ -7 V  ->  172 fF @ -5 V
+#   Iph ∥ C_PD ─[R_S]─ node1[C_CPW] ─[L_CPW1]─ node2[R_m+L_m] ─[L_CPW2]─ port
 # ═══════════════════════════════════════════════════════════════════
 C_CPW = 46.53e-15; R_L = 50.0; Rs = 8.92
-Cj    = 161.0e-15                                 # C-V @ -5 V
+Cj    = 172.0e-15                                 # C_PD, S11 fit @ -5 V (ladder, L locked)
 
-def _Y_Rp(w, Rp, Lrp):
-    return 0.0 if np.isinf(Rp) else 1.0/(Rp + 1j*w*Lrp)
-def sim_S11(w, Rp, Lcpw, Lrp, Lcpw2):
-    Zs = Rs + 1j*w*Lcpw2
-    Z_dev = Zs + 1/(1j*w*Cj)
-    Y_n = 1j*w*C_CPW + _Y_Rp(w, Rp, Lrp) + 1/Z_dev
-    Z_in = 1j*w*Lcpw + 1/Y_n
+def sim_S11(w, Rp, Lcpw1, Lrp, Lcpw2):
+    Z1  = Rs + 1/(1j*w*Cj)
+    Y1  = 1j*w*C_CPW + 1/Z1
+    Z2  = 1j*w*Lcpw1 + 1/Y1
+    Yrm = 0.0 if np.isinf(Rp) else 1/(Rp + 1j*w*Lrp)
+    Y2  = Yrm + 1/Z2
+    Z_in = 1j*w*Lcpw2 + 1/Y2
     return (Z_in - 50)/(Z_in + 50)
-def H_ckt(w, Rp, Lcpw, Lrp, Lcpw2):
-    Zs = Rs + 1j*w*Lcpw2
-    Y_A = 1j*w*C_CPW + _Y_Rp(w, Rp, Lrp) + 1/(1j*w*Lcpw + R_L)
-    return (R_L/(1j*w*Lcpw + R_L))/(1j*w*Cj + Y_A*(1 + 1j*w*Cj*Zs))
+def H_ckt(w, Rp, Lcpw1, Lrp, Lcpw2):
+    """Transimpedance V_RL/I_ph of the ladder via ABCD cascade."""
+    w = np.atleast_1d(np.asarray(w, dtype=float))
+    A = np.ones_like(w, dtype=complex); B = np.zeros_like(w, dtype=complex)
+    C = np.zeros_like(w, dtype=complex); D = np.ones_like(w, dtype=complex)
+    def _series(Z):
+        nonlocal A, B, C, D
+        A, B, C, D = A, A*Z + B, C, C*Z + D
+    def _shunt(Y):
+        nonlocal A, B, C, D
+        A, B, C, D = A + B*Y, B, C + D*Y, D
+    _shunt(1j*w*Cj)
+    _series(Rs + 0j*w)
+    _shunt(1j*w*C_CPW)
+    _series(1j*w*Lcpw1)
+    if not np.isinf(Rp):
+        _shunt(1/(Rp + 1j*w*Lrp))
+    _series(1j*w*Lcpw2)
+    return R_L/(C*R_L + D)
 def get_bw(f, Hd):
     idx = np.where(Hd <= -3)[0]
     return f[idx[0]]/1e9 if len(idx) else np.nan
 
 # ═══════════════════════════════════════════════════════════════════
-# 3. DEVICE CONFIGS — L values reused from -7 V Option-B fit (locked)
+# 3. DEVICE CONFIGS — ladder L values reused from -7 V fit (locked,
+#    bias-independent);  L_m = FEM values (not fitted)
 # ═══════════════════════════════════════════════════════════════════
 configs = [
     dict(lbl='Rp=200Ω', Rp=200.0,  col='#888888', mk='D',
          s1p='data_5V_5mA/S11_200ohm.s1p', fr='data_5V_5mA/200ohm.xlsx',
-         Lcpw=197.9e-12, Lcpw2=0.0,      Lrp=153.7e-12),
+         Lcpw=5.2e-12,   Lcpw2=190.3e-12, Lrp=153.7e-12),
     dict(lbl='Rp=38Ω',  Rp=38.0,   col='#1B998B', mk='o',
          s1p='data_5V_5mA/S11_38ohm.s1p',  fr='data_5V_5mA/38ohm.xlsx',
-         Lcpw=141.6e-12, Lcpw2=56.3e-12, Lrp=65.6e-12),
+         Lcpw=37.5e-12,  Lcpw2=146.0e-12, Lrp=65.6e-12),
     dict(lbl='Rp=60Ω',  Rp=60.0,   col='#FF8C00', mk='s',
          s1p='data_5V_5mA/S11_60ohm.s1p',  fr='data_5V_5mA/60ohm.xlsx',
-         Lcpw=149.9e-12, Lcpw2=48.0e-12, Lrp=71.8e-12),
+         Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
     dict(lbl='Open',    Rp=np.inf, col='#E91E8C', mk='^',
          s1p='data_5V_5mA/S11_WO.s1p',     fr='data_5V_5mA/WO.xlsx',
-         Lcpw=197.9e-12, Lcpw2=0.0,      Lrp=0.0),
+         Lcpw=129.4e-12, Lcpw2=54.6e-12,  Lrp=0.0),
 ]
 
 def load_s1p(path):
@@ -99,7 +117,7 @@ def load_fr(path):
 f_plot = np.linspace(0.1e9, 50e9, 5000); w_plot = 2*np.pi*f_plot
 
 print('='*100)
-print('UTC-PD 30 μm  —  -5 V / 5 mA  (rigorous H_ph, Cj=161 fF, L locked from -7 V)')
+print('UTC-PD 30 μm  —  -5 V / 5 mA  (ladder circuit, C_PD=172 fF, L locked from -7 V)')
 print('-'*100)
 _wtr = 2*np.pi*np.linspace(1e9,200e9,400000)
 _mtr = np.abs(H_ph(_wtr))/np.abs(H_ph(1e-3*2*np.pi))
@@ -142,7 +160,7 @@ def draw_smith(ax, lw=0.6):
             ax.plot(xx[m],yy[m],color='#aaa',lw=lw,ls=':',zorder=0)
 
 fig, axes = plt.subplots(3, 4, figsize=(20, 14))
-fig.suptitle('UTC-PD 30 μm  —  Bias = -5 V, I_ph = 5 mA  (rigorous $H_{ph}$, $C_j$=161 fF, L locked from -7 V)\n'
+fig.suptitle('UTC-PD 30 μm  —  Bias = -5 V, I_ph = 5 mA  (ladder circuit, $C_{PD}$=172 fF, L locked from -7 V)\n'
              'Row 1: Smith  |  Row 2: $|S_{11}|$ dB  |  Row 3: Frequency response',
              fontsize=11, fontweight='bold')
 for ci, cfg in enumerate(configs):
@@ -204,7 +222,7 @@ for cfg in configs:
     _write(os.path.join(_out, f'freqresp_meas_{t}.txt'), ['Freq_GHz','Norm_dB'], list(zip(cfg['fm']/1e9, cfg['pm'])))
     _write(os.path.join(_out, f'freqresp_sim_{t}.txt'),  ['Freq_GHz','Norm_dB'], list(zip(f_plot/1e9, cfg['Hd_p'])))
 with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
-    f.write('# -5 V / 5 mA  (rigorous H_ph, Cj=161 fF, L locked from -7 V)\n')
+    f.write('# -5 V / 5 mA  (ladder circuit, C_PD=172 fF, L locked from -7 V)\n')
     f.write(f'# transit-limited f_tr = {_wtr[_itr[0]]/2/np.pi/1e9:.2f} GHz (bias-independent)\n')
     f.write('Device\tCj_fF\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tRMS_S11\tBW_GHz\tRMS_H_dB\n')
     for cfg in configs:
