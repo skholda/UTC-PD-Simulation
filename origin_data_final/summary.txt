@@ -1,9 +1,9 @@
 # Final baseline (locked)
 # H_ph: 4-term transit (undep e w/ tau_A; in-situ dep-abs e/h no tau_A)  W_A=480 nm  W_Ad=160 nm  W_C=820 nm  W_norm=W_A+W_C+2W_Ad=1620 nm
 #   tau_A=3.530 ps  tau_eD=2.026 ps  tau_C=7.794 ps  tau_h=3.333 ps  (material-resolved v(E); tau_R neglected)  |  f_tr=32.62 GHz
-# Circuit: LADDER topology (Iph||C_PD -Rs- [C_CPW] -L_CPW1- [Rm+Lm] -L_CPW2- port)  C_PD=137.00 fF  Rs=8.92 ohm  C_CPW=46.53 fF
+# Circuit: LADDER topology (Iph||C_PD -Rs- [C_CPW] -L_CPW1- [Rm+Lm] -L_CPW2- port)  C_PD=131.00 fF  Rs=8.92 ohm  C_CPW=46.53 fF
 Device	L_CPW1_pH	L_CPW2_pH	L_m_pH	C_PD_fF	Rs_ohm	RMS_S11	BW_GHz	RMS_H_dB
-Rp=200Ω	5.2000	190.3000	153.7000	137.0000	8.9200	0.06331	19.6947	0.5828
-Rp=38Ω	37.5000	146.0000	65.6000	137.0000	8.9200	0.05648	29.0977	0.6599
-Rp=60Ω	32.2000	150.9000	71.8000	137.0000	8.9200	0.05978	24.6857	0.9399
-Open	0.0000	184.0000	0.0000	137.0000	8.9200	0.07393	17.6384	0.8984
+Rp=200Ω	9.4000	191.7000	153.7000	131.0000	8.9200	0.07121	20.4233	0.6373
+Rp=38Ω	42.4000	145.8000	65.6000	131.0000	8.9200	0.05809	30.2456	0.5174
+Rp=60Ω	37.5000	150.9000	71.8000	131.0000	8.9200	0.06034	25.6639	0.7751
+Open	0.0000	190.0000	0.0000	131.0000	8.9200	0.06812	18.3471	0.7793

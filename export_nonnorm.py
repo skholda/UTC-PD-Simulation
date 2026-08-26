@@ -46,10 +46,10 @@ def H_ckt(w, Cj, Rp, Lcpw1, Lrp, Lcpw2):
 
 # device ladder L config (bias-independent, from -7 V ladder fit)
 DEV = {
- 'Rp_200ohm': dict(Rp=200.0, Lcpw=5.2e-12,   Lcpw2=190.3e-12, Lrp=153.7e-12),
- 'Rp_38ohm' : dict(Rp=38.0,  Lcpw=37.5e-12,  Lcpw2=146.0e-12, Lrp=65.6e-12),
- 'Rp_60ohm' : dict(Rp=60.0,  Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
- 'Open'     : dict(Rp=np.inf,Lcpw=0.0,       Lcpw2=184.0e-12, Lrp=0.0),
+ 'Rp_200ohm': dict(Rp=200.0, Lcpw=9.4e-12,   Lcpw2=191.7e-12, Lrp=153.7e-12),
+ 'Rp_38ohm' : dict(Rp=38.0,  Lcpw=42.4e-12,  Lcpw2=145.8e-12, Lrp=65.6e-12),
+ 'Rp_60ohm' : dict(Rp=60.0,  Lcpw=37.5e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
+ 'Open'     : dict(Rp=np.inf,Lcpw=0.0,       Lcpw2=190.0e-12, Lrp=0.0),
 }
 f_plot = np.linspace(0.1e9, 45e9, 4500); w_plot = 2*np.pi*f_plot
 
@@ -81,7 +81,7 @@ for tag,cfg in DEV.items():
     write(f'origin_export/minus7V/freqresp_nonnorm_meas_{tag}.txt',
           ['Freq_GHz','Meas_dBm'], [fm, meas_abs])
     write(f'origin_export/minus7V/freqresp_nonnorm_sim_{tag}.txt',
-          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 137.0e-15, 1.0e-3)])  # Iph=1 mA
+          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 131.0e-15, 1.0e-3)])  # Iph=1 mA
 
 # ── -5 V measured (xlsx, Cal RF dBm) ───────────────────────────────
 map5={'Rp_200ohm':'200ohm','Rp_38ohm':'38ohm','Rp_60ohm':'60ohm','Open':'WO'}
@@ -93,7 +93,7 @@ for tag,cfg in DEV.items():
     write(f'origin_export/minus5V_5mA/freqresp_nonnorm_meas_{tag}.txt',
           ['Freq_GHz','Meas_CalRF_dBm'], [fm, cal])
     write(f'origin_export/minus5V_5mA/freqresp_nonnorm_sim_{tag}.txt',
-          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 172.0e-15, 5.0e-3)])  # Iph=5 mA
+          ['Freq_GHz','Model_dBm'], [f_plot/1e9, model_dBm(cfg, 161.0e-15, 5.0e-3)])  # Iph=5 mA
 
 print('Wrote non-normalized freqresp files (measured & model both in dBm):')
 print('  origin_export/minus7V/freqresp_nonnorm_{meas,sim}_*.txt   (Iph=1 mA)')

@@ -29,14 +29,14 @@ Locked framework:
 
   Circuit — LADDER topology (matches device schematic):
     Iph ∥ C_PD ─[R_S]─ node1[C_CPW] ─[L_CPW1]─ node2[R_m+L_m] ─[L_CPW2]─ port
-    C_PD  = 137.0 fF   (common, S11-only fit @ -7 V, ladder)
+    C_PD  = 131.0 fF   (C-V @ -7 V, LOCKED — not refit)
     Rs    = 8.92 Ω
     C_CPW = 46.53 fF   (pad-fitted)
     L_CPW1 / L_CPW2 per device (S11 fit; sum ≈ 184-196 pH, geometric):
-        200 Ω: L_CPW1=  5.2, L_CPW2=190.3
-        38 Ω : L_CPW1= 37.5, L_CPW2=146.0
-        60 Ω : L_CPW1= 32.2, L_CPW2=150.9
-        Open : L_CPW1=  0.0, L_CPW2=184.0  (no shunt -> L1 set to 0; only the sum matters)
+        200 Ω: L_CPW1=  9.4, L_CPW2=191.7
+        38 Ω : L_CPW1= 42.4, L_CPW2=145.8
+        60 Ω : L_CPW1= 37.5, L_CPW2=150.9
+        Open : L_CPW1=  0.0, L_CPW2=190.0  (no shunt -> L1 set to 0; only the sum matters)
     L_m   : per-device, MATLAB FEM values (NOT fitted)
             200Ω: 153.7 pH, 38Ω: 65.6 pH, 60Ω: 71.8 pH, Open: 0 pH
     H_ckt = ladder transimpedance V_RL/I_ph via ABCD cascade
@@ -105,7 +105,7 @@ def H_ph(w):
 #                       GND              GND
 C_CPW = 46.53e-15
 R_L   = 50.0
-Cj    = 137.0e-15        # C_PD, common S11 fit @ -7 V (ladder topology)
+Cj    = 131.0e-15        # C_PD from C-V @ -7 V (LOCKED, not refit)
 Rs    = 8.92
 
 def sim_S11(w, Rs, Cpd, Rp, Lcpw1, Lrp=0.0, Lcpw2=0.0):
@@ -161,16 +161,16 @@ ref_f_GHz, ref_loss_dB = _ns['ref_f_GHz'], _ns['ref_loss_dB']
 configs = [
     dict(lbl='Rp=200Ω', Rp=200.0,   col='#888888', mk='D',
          s1p=_ns['_s1p_200'], freq=_ns['_freq_200'],
-         Lcpw=5.2e-12,   Lcpw2=190.3e-12, Lrp=153.7e-12),  # ladder fit, FEM L_m
+         Lcpw=9.4e-12,   Lcpw2=191.7e-12, Lrp=153.7e-12),  # ladder fit (C_PD=131), FEM L_m
     dict(lbl='Rp=38Ω',  Rp=38.0,    col='#1B998B', mk='o',
          s1p=_ns['_s1p_33'],  freq=_ns['_freq_33'],
-         Lcpw=37.5e-12,  Lcpw2=146.0e-12, Lrp=65.6e-12),   # ladder fit, FEM L_m
+         Lcpw=42.4e-12,  Lcpw2=145.8e-12, Lrp=65.6e-12),   # ladder fit (C_PD=131), FEM L_m
     dict(lbl='Rp=60Ω',  Rp=60.0,    col='#FF8C00', mk='s',
          s1p=_ns['_s1p_55'],  freq=_ns['_freq_55'],
-         Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),   # ladder fit, FEM L_m
+         Lcpw=37.5e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),   # ladder fit (C_PD=131), FEM L_m
     dict(lbl='Open',    Rp=np.inf,  col='#E91E8C', mk='^',
          s1p=_ns['_s1p_WO'],  freq=_ns['_freq_WO'],
-         Lcpw=0.0,       Lcpw2=184.0e-12, Lrp=0.0),        # no shunt -> L1=0, only sum matters
+         Lcpw=0.0,       Lcpw2=190.0e-12, Lrp=0.0),        # no shunt -> L1=0, only sum matters
 ]
 
 def gs1p(arr, f_max):

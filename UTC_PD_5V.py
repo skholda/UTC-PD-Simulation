@@ -3,7 +3,7 @@ UTC-PD 30 μm  —  -5 V / 5 mA simulation  (rigorous H_ph baseline)
 ================================================================
 Same locked framework as UTC_PD_final.py (-7 V), with the ONLY bias-dependent
 change being the junction capacitance (C-V):
-    C_PD(-7 V) = 137 fF   ->   C_PD(-5 V) = 172 fF   (ladder topology)
+    C_PD(-7 V) = 131 fF   ->   C_PD(-5 V) = 161 fF   (C-V values, LOCKED)
 Inductances are geometric (bias-independent): L_total, L_CPW2, FEM L_Rp reused
 from the -7 V ladder fit AS-IS. Rs, C_CPW bias-independent.
 
@@ -40,11 +40,11 @@ def H_ph(w):
 
 # ═══════════════════════════════════════════════════════════════════
 # 2. CIRCUIT — LADDER topology; bias-independent params locked; only C_PD
-#    changes with bias (C-V):  137 fF @ -7 V  ->  172 fF @ -5 V
+#    changes with bias (C-V):  131 fF @ -7 V  ->  161 fF @ -5 V
 #   Iph ∥ C_PD ─[R_S]─ node1[C_CPW] ─[L_CPW1]─ node2[R_m+L_m] ─[L_CPW2]─ port
 # ═══════════════════════════════════════════════════════════════════
 C_CPW = 46.53e-15; R_L = 50.0; Rs = 8.92
-Cj    = 172.0e-15                                 # C_PD, S11 fit @ -5 V (ladder, L locked)
+Cj    = 161.0e-15                                 # C_PD from C-V @ -5 V (LOCKED)
 
 def sim_S11(w, Rp, Lcpw1, Lrp, Lcpw2):
     Z1  = Rs + 1/(1j*w*Cj)
@@ -84,16 +84,16 @@ def get_bw(f, Hd):
 configs = [
     dict(lbl='Rp=200Ω', Rp=200.0,  col='#888888', mk='D',
          s1p='data_5V_5mA/S11_200ohm.s1p', fr='data_5V_5mA/200ohm.xlsx',
-         Lcpw=5.2e-12,   Lcpw2=190.3e-12, Lrp=153.7e-12),
+         Lcpw=9.4e-12,   Lcpw2=191.7e-12, Lrp=153.7e-12),
     dict(lbl='Rp=38Ω',  Rp=38.0,   col='#1B998B', mk='o',
          s1p='data_5V_5mA/S11_38ohm.s1p',  fr='data_5V_5mA/38ohm.xlsx',
-         Lcpw=37.5e-12,  Lcpw2=146.0e-12, Lrp=65.6e-12),
+         Lcpw=42.4e-12,  Lcpw2=145.8e-12, Lrp=65.6e-12),
     dict(lbl='Rp=60Ω',  Rp=60.0,   col='#FF8C00', mk='s',
          s1p='data_5V_5mA/S11_60ohm.s1p',  fr='data_5V_5mA/60ohm.xlsx',
-         Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
+         Lcpw=37.5e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
     dict(lbl='Open',    Rp=np.inf, col='#E91E8C', mk='^',
          s1p='data_5V_5mA/S11_WO.s1p',     fr='data_5V_5mA/WO.xlsx',
-         Lcpw=0.0,       Lcpw2=184.0e-12, Lrp=0.0),
+         Lcpw=0.0,       Lcpw2=190.0e-12, Lrp=0.0),
 ]
 
 def load_s1p(path):
@@ -117,7 +117,7 @@ def load_fr(path):
 f_plot = np.linspace(0.1e9, 50e9, 5000); w_plot = 2*np.pi*f_plot
 
 print('='*100)
-print('UTC-PD 30 μm  —  -5 V / 5 mA  (ladder circuit, C_PD=172 fF, L locked from -7 V)')
+print('UTC-PD 30 μm  —  -5 V / 5 mA  (ladder circuit, C_PD=161 fF C-V, L locked from -7 V)')
 print('-'*100)
 _wtr = 2*np.pi*np.linspace(1e9,200e9,400000)
 _mtr = np.abs(H_ph(_wtr))/np.abs(H_ph(1e-3*2*np.pi))
@@ -222,7 +222,7 @@ for cfg in configs:
     _write(os.path.join(_out, f'freqresp_meas_{t}.txt'), ['Freq_GHz','Norm_dB'], list(zip(cfg['fm']/1e9, cfg['pm'])))
     _write(os.path.join(_out, f'freqresp_sim_{t}.txt'),  ['Freq_GHz','Norm_dB'], list(zip(f_plot/1e9, cfg['Hd_p'])))
 with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
-    f.write('# -5 V / 5 mA  (ladder circuit, C_PD=172 fF, L locked from -7 V)\n')
+    f.write('# -5 V / 5 mA  (ladder circuit, C_PD=161 fF C-V, L locked from -7 V)\n')
     f.write(f'# transit-limited f_tr = {_wtr[_itr[0]]/2/np.pi/1e9:.2f} GHz (bias-independent)\n')
     f.write('Device\tCj_fF\tL_CPW_pH\tL_CPW2_pH\tL_Rp_pH\tRMS_S11\tBW_GHz\tRMS_H_dB\n')
     for cfg in configs:
