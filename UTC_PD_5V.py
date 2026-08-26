@@ -93,7 +93,7 @@ configs = [
          Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
     dict(lbl='Open',    Rp=np.inf, col='#E91E8C', mk='^',
          s1p='data_5V_5mA/S11_WO.s1p',     fr='data_5V_5mA/WO.xlsx',
-         Lcpw=129.4e-12, Lcpw2=54.6e-12,  Lrp=0.0),
+         Lcpw=0.0,       Lcpw2=184.0e-12, Lrp=0.0),
 ]
 
 def load_s1p(path):

@@ -49,7 +49,7 @@ DEV = {
  'Rp_200ohm': dict(Rp=200.0, Lcpw=5.2e-12,   Lcpw2=190.3e-12, Lrp=153.7e-12),
  'Rp_38ohm' : dict(Rp=38.0,  Lcpw=37.5e-12,  Lcpw2=146.0e-12, Lrp=65.6e-12),
  'Rp_60ohm' : dict(Rp=60.0,  Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
- 'Open'     : dict(Rp=np.inf,Lcpw=129.4e-12, Lcpw2=54.6e-12,  Lrp=0.0),
+ 'Open'     : dict(Rp=np.inf,Lcpw=0.0,       Lcpw2=184.0e-12, Lrp=0.0),
 }
 f_plot = np.linspace(0.1e9, 45e9, 4500); w_plot = 2*np.pi*f_plot
 

@@ -36,7 +36,7 @@ Locked framework:
         200 Ω: L_CPW1=  5.2, L_CPW2=190.3
         38 Ω : L_CPW1= 37.5, L_CPW2=146.0
         60 Ω : L_CPW1= 32.2, L_CPW2=150.9
-        Open : L_CPW1=129.4, L_CPW2= 54.6  (no shunt -> only the sum matters)
+        Open : L_CPW1=  0.0, L_CPW2=184.0  (no shunt -> L1 set to 0; only the sum matters)
     L_m   : per-device, MATLAB FEM values (NOT fitted)
             200Ω: 153.7 pH, 38Ω: 65.6 pH, 60Ω: 71.8 pH, Open: 0 pH
     H_ckt = ladder transimpedance V_RL/I_ph via ABCD cascade
@@ -170,7 +170,7 @@ configs = [
          Lcpw=32.2e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),   # ladder fit, FEM L_m
     dict(lbl='Open',    Rp=np.inf,  col='#E91E8C', mk='^',
          s1p=_ns['_s1p_WO'],  freq=_ns['_freq_WO'],
-         Lcpw=129.4e-12, Lcpw2=54.6e-12,  Lrp=0.0),        # only L1+L2 meaningful (no shunt)
+         Lcpw=0.0,       Lcpw2=184.0e-12, Lrp=0.0),        # no shunt -> L1=0, only sum matters
 ]
 
 def gs1p(arr, f_max):
