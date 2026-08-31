@@ -81,4 +81,4 @@ tau_h = 160e-9 / v_h
 print(f'  τ_eD (W_Ad=160, InGaAs)          = {tau_eD*1e12:.3f} ps')
 print(f'  τ_C  (W_C=820, grad+cliff+coll)  = {tau_C*1e12:.3f} ps')
 print(f'  τ_h  (W_Ad=160 / v_h,sat)        = {tau_h*1e12:.3f} ps')
-print(f'  (τ_A = 3.530 ps kept; W_norm = 480+820+2*160 = 1620 nm)')
+print(f'  (τ_A = 1.989 ps, staircase; W_norm = 480+820+2*160 = 1620 nm)')

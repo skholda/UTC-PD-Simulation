@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 # ═══════════════════════════════════════════════════════════════════
 W_A = 480e-9; W_Ad = 160e-9; W_C = 820e-9
 W_norm = W_A + W_C + 2*W_Ad                       # 1620 nm  (DC -> |H_ph(0)|=1)
-tau_A = 3.530e-12; tau_R = 0.0                    # tau_R neglected in bandwidth calc
+tau_A = 1.989e-12; tau_R = 0.0                    # staircase tau_A; tau_R neglected
 # material-resolved layer-average v(E_avg), device field (-7V,0.5mA,lat10um); τ_A kept:
 tau_eD = 2.026e-12                                # dep InGaAs abs 160 nm (InGaAs)
 tau_C  = 7.794e-12                                # grading(InGaAsP)+cliff(InP)+collector(InP)

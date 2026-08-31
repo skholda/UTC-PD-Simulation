@@ -19,13 +19,14 @@ Locked framework:
 
   Transit times (MATERIAL-RESOLVED layer-average; each sublayer its own v(E); τ_A kept):
     E_avg from device field (Lumerical -7 V, 0.5 mA, lat 10 um).
-    τ_A   = 3.530 ps   (undep-abs diffusion:  W_A^2 / [D_e (3 + ln(p_max/p_min))])
+    τ_A   = 1.989 ps   (STAIRCASE: 3-step doping 5e18/1.3e18/4e17, interface one-way
+                        valves, per-layer diffusion, D_e=118; continuous formula = 3.534)
     τ_eD  = 2.026 ps   (dep InGaAs abs 160 nm, InGaAs v=0.79e7 cm/s)
     τ_C   = 7.794 ps   (grading InGaAsP 0.27 + cliff InP 0.53 + collector InP 6.99)
     τ_h   = 3.333 ps   (dep-abs hole, W_Ad/v_h,sat, v_h,sat=0.48e7 cm/s InGaAs, lit.)
     τ_R   = neglected in bandwidth calculation
 
-  Transit-time-limited f_tr = 32.62 GHz  (|H_ph| = -3 dB)
+  Transit-time-limited f_tr = 42.25 GHz  (|H_ph| = -3 dB)
 
   Circuit — LADDER topology (matches device schematic):
     Iph ∥ C_PD ─[R_S]─ node1[C_CPW] ─[L_CPW1]─ node2[R_m+L_m] ─[L_CPW2]─ port
@@ -71,7 +72,12 @@ W_norm = W_A + W_C + 2*W_Ad   # 1620 nm  (numerator DC sum -> |H_ph(0)|=1)
 #   τ_C  = grading 0.136+0.136 (InGaAsP) + cliff 0.527 (InP) + collector 6.994 (InP)
 #          over W_C=820 nm -> 7.794 ps
 v_h_InGaAs = 4.8e4       # m/s  InGaAs hole saturation velocity (0.48e7 cm/s, literature)
-tau_A  = 3.530e-12       # undep-absorber effective electron transit (diff+quasi-field) — KEPT
+tau_A  = 1.989e-12       # undep-abs STAIRCASE model: 3-step doping
+                         #   (5e18/1.3e18/4e17 cm^-3, 120/180/180 nm, D_e=118 cm2/s)
+                         #   quasi-field concentrated at interfaces (one-way valves);
+                         #   per-layer diffusion W^2/3D (own) + W^2/2D (transit),
+                         #   thickness-weighted -> 1.989 ps  (continuous-grading
+                         #   formula W^2/[De(3+ln r)] = 3.534 ps kept as upper bound)
 tau_R  = 0.0            # dielectric relaxation — NEGLECTED in bandwidth calc
 tau_eD = 2.026e-12       # dep-absorber electron   (InGaAs, material-resolved)
 tau_C  = 7.794e-12       # collector-stack electron (grading+cliff+collector, material-resolved)
@@ -365,7 +371,7 @@ with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
             f'W_A={W_A*1e9:.0f} nm  W_Ad={W_Adep*1e9:.0f} nm  W_C={W_C*1e9:.0f} nm  '
             f'W_norm=W_A+W_C+2W_Ad={W_norm*1e9:.0f} nm\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
-            f'tau_h={tau_h*1e12:.3f} ps  (material-resolved v(E); tau_R neglected)  |  f_tr=32.62 GHz\n')
+            f'tau_h={tau_h*1e12:.3f} ps  (material-resolved v(E); tau_R neglected; staircase tau_A)  |  f_tr=42.25 GHz\n')
     f.write(f'# Circuit: LADDER topology (Iph||C_PD -Rs- [C_CPW] -L_CPW1- [Rm+Lm] -L_CPW2- port)  '
             f'C_PD={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW1_pH\tL_CPW2_pH\tL_m_pH\tC_PD_fF\tRs_ohm\t'

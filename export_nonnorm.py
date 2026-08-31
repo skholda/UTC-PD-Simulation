@@ -14,7 +14,7 @@ import os, re, sys, numpy as np, pandas as pd
 # ── 4-term H_ph (current baseline) ─────────────────────────────────
 W_A, W_Ad, W_C = 480e-9, 160e-9, 820e-9
 W_norm = W_A + W_C + 2*W_Ad
-tau_A, tau_R = 3.530e-12, 0.0
+tau_A, tau_R = 1.989e-12, 0.0   # staircase tau_A
 tau_eD, tau_C = 2.026e-12, 7.794e-12
 tau_h = W_Ad/4.8e4
 def H_ph(w):
