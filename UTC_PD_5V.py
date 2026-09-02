@@ -4,8 +4,8 @@ UTC-PD 30 μm  —  -5 V / 5 mA simulation  (rigorous H_ph baseline)
 Same locked framework as UTC_PD_final.py (-7 V), with the ONLY bias-dependent
 change being the junction capacitance (C-V):
     C_PD(-7 V) = 131 fF   ->   C_PD(-5 V) = 161 fF   (C-V values, LOCKED)
-Inductances are geometric (bias-independent): L_total, L_CPW2, FEM L_Rp reused
-from the -7 V ladder fit AS-IS. Rs, C_CPW bias-independent.
+Inductances are geometric (bias-independent): 1-L L_CPW and FEM L_m reused
+from the -7 V fit AS-IS. Rs, C_CPW bias-independent.
 
 H_ph: identical rigorous Ramo J_tot integral as the -7 V baseline
       (undep-abs electron carries τ_A; dep-abs in-situ e/h carry none).
@@ -39,9 +39,9 @@ def H_ph(w):
     return (t1 + t2 + t3 + t4) / W_norm
 
 # ═══════════════════════════════════════════════════════════════════
-# 2. CIRCUIT — LADDER topology; bias-independent params locked; only C_PD
-#    changes with bias (C-V):  131 fF @ -7 V  ->  161 fF @ -5 V
-#   Iph ∥ C_PD ─[R_S]─ node1[C_CPW] ─[L_CPW1]─ node2[R_m+L_m] ─[L_CPW2]─ port
+# 2. CIRCUIT — 1-L LADDER (single CPW inductance; L_CPW1=0); bias-independent
+#    params locked; only C_PD changes with bias: 131 fF @ -7 V -> 161 fF @ -5 V
+#   Iph ∥ C_PD ─[R_S]─ node1{ C_CPW ∥ (R_m+L_m) } ─[L_CPW]─ port
 # ═══════════════════════════════════════════════════════════════════
 C_CPW = 46.53e-15; R_L = 50.0; Rs = 8.92
 Cj    = 161.0e-15                                 # C_PD from C-V @ -5 V (LOCKED)
@@ -84,16 +84,16 @@ def get_bw(f, Hd):
 configs = [
     dict(lbl='Rp=200Ω', Rp=200.0,  col='#888888', mk='D',
          s1p='data_5V_5mA/S11_200ohm.s1p', fr='data_5V_5mA/200ohm.xlsx',
-         Lcpw=9.4e-12,   Lcpw2=191.7e-12, Lrp=153.7e-12),
+         Lcpw=0.0, Lcpw2=200.4e-12, Lrp=153.7e-12),
     dict(lbl='Rp=38Ω',  Rp=38.0,   col='#1B998B', mk='o',
          s1p='data_5V_5mA/S11_38ohm.s1p',  fr='data_5V_5mA/38ohm.xlsx',
-         Lcpw=42.4e-12,  Lcpw2=145.8e-12, Lrp=65.6e-12),
+         Lcpw=0.0, Lcpw2=158.5e-12, Lrp=65.6e-12),
     dict(lbl='Rp=60Ω',  Rp=60.0,   col='#FF8C00', mk='s',
          s1p='data_5V_5mA/S11_60ohm.s1p',  fr='data_5V_5mA/60ohm.xlsx',
-         Lcpw=37.5e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
+         Lcpw=0.0, Lcpw2=172.5e-12, Lrp=71.8e-12),
     dict(lbl='Open',    Rp=np.inf, col='#E91E8C', mk='^',
          s1p='data_5V_5mA/S11_WO.s1p',     fr='data_5V_5mA/WO.xlsx',
-         Lcpw=0.0,       Lcpw2=190.0e-12, Lrp=0.0),
+         Lcpw=0.0, Lcpw2=190.0e-12, Lrp=0.0),
 ]
 
 def load_s1p(path):

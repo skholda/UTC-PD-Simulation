@@ -28,16 +28,14 @@ Locked framework:
 
   Transit-time-limited f_tr = 42.25 GHz  (|H_ph| = -3 dB)
 
-  Circuit — LADDER topology (matches device schematic):
-    Iph ∥ C_PD ─[R_S]─ node1[C_CPW] ─[L_CPW1]─ node2[R_m+L_m] ─[L_CPW2]─ port
+  Circuit — 1-L LADDER topology (single CPW inductance; user schematic):
+    Iph ∥ C_PD ─[R_S]─ node1{ C_CPW ∥ (R_m+L_m) } ─[L_CPW]─ port
+    (implemented as the 2-node ladder with L_CPW1 fixed to 0)
     C_PD  = 131.0 fF   (C-V @ -7 V, LOCKED — not refit)
     Rs    = 8.92 Ω
-    C_CPW = 46.53 fF   (pad-fitted)
-    L_CPW1 / L_CPW2 per device (S11 fit; sum ≈ 184-196 pH, geometric):
-        200 Ω: L_CPW1=  9.4, L_CPW2=191.7
-        38 Ω : L_CPW1= 42.4, L_CPW2=145.8
-        60 Ω : L_CPW1= 37.5, L_CPW2=150.9
-        Open : L_CPW1=  0.0, L_CPW2=190.0  (no shunt -> L1 set to 0; only the sum matters)
+    C_CPW = 46.53 fF   (pad-fitted, fixed)
+    L_CPW per device (S11 fit, only free parameter):
+        200 Ω: 200.4 pH   38 Ω: 158.5 pH   60 Ω: 172.5 pH   Open: 190.0 pH
     L_m   : per-device, MATLAB FEM values (NOT fitted)
             200Ω: 153.7 pH, 38Ω: 65.6 pH, 60Ω: 71.8 pH, Open: 0 pH
     H_ckt = ladder transimpedance V_RL/I_ph via ABCD cascade
@@ -167,16 +165,16 @@ ref_f_GHz, ref_loss_dB = _ns['ref_f_GHz'], _ns['ref_loss_dB']
 configs = [
     dict(lbl='Rp=200Ω', Rp=200.0,   col='#888888', mk='D',
          s1p=_ns['_s1p_200'], freq=_ns['_freq_200'],
-         Lcpw=9.4e-12,   Lcpw2=191.7e-12, Lrp=153.7e-12),  # ladder fit (C_PD=131), FEM L_m
+         Lcpw=0.0, Lcpw2=200.4e-12, Lrp=153.7e-12),   # 1-L fit (C_PD=131), FEM L_m
     dict(lbl='Rp=38Ω',  Rp=38.0,    col='#1B998B', mk='o',
          s1p=_ns['_s1p_33'],  freq=_ns['_freq_33'],
-         Lcpw=42.4e-12,  Lcpw2=145.8e-12, Lrp=65.6e-12),   # ladder fit (C_PD=131), FEM L_m
+         Lcpw=0.0, Lcpw2=158.5e-12, Lrp=65.6e-12),    # 1-L fit (C_PD=131), FEM L_m
     dict(lbl='Rp=60Ω',  Rp=60.0,    col='#FF8C00', mk='s',
          s1p=_ns['_s1p_55'],  freq=_ns['_freq_55'],
-         Lcpw=37.5e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),   # ladder fit (C_PD=131), FEM L_m
+         Lcpw=0.0, Lcpw2=172.5e-12, Lrp=71.8e-12),    # 1-L fit (C_PD=131), FEM L_m
     dict(lbl='Open',    Rp=np.inf,  col='#E91E8C', mk='^',
          s1p=_ns['_s1p_WO'],  freq=_ns['_freq_WO'],
-         Lcpw=0.0,       Lcpw2=190.0e-12, Lrp=0.0),        # no shunt -> L1=0, only sum matters
+         Lcpw=0.0, Lcpw2=190.0e-12, Lrp=0.0),         # 1-L fit
 ]
 
 def gs1p(arr, f_max):
@@ -372,7 +370,7 @@ with open(os.path.join(_out, 'summary.txt'), 'w', encoding='utf-8') as f:
             f'W_norm=W_A+W_C+2W_Ad={W_norm*1e9:.0f} nm\n')
     f.write(f'#   tau_A={tau_A*1e12:.3f} ps  tau_eD={tau_eD*1e12:.3f} ps  tau_C={tau_C*1e12:.3f} ps  '
             f'tau_h={tau_h*1e12:.3f} ps  (material-resolved v(E); tau_R neglected; staircase tau_A)  |  f_tr=42.25 GHz\n')
-    f.write(f'# Circuit: LADDER topology (Iph||C_PD -Rs- [C_CPW] -L_CPW1- [Rm+Lm] -L_CPW2- port)  '
+    f.write(f'# Circuit: 1-L LADDER (Iph||C_PD -Rs- [C_CPW || (Rm+Lm)] -L_CPW- port; L_CPW1=0)  '
             f'C_PD={Cj*1e15:.2f} fF  Rs={Rs} ohm  C_CPW={C_CPW*1e15:.2f} fF\n')
     f.write('Device\tL_CPW1_pH\tL_CPW2_pH\tL_m_pH\tC_PD_fF\tRs_ohm\t'
             'RMS_S11\tBW_GHz\tRMS_H_dB\n')

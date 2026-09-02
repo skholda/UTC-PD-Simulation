@@ -44,12 +44,12 @@ def H_ckt(w, Cj, Rp, Lcpw1, Lrp, Lcpw2):
     _series(1j*w*Lcpw2)
     return R_L/(C*R_L + D)
 
-# device ladder L config (bias-independent, from -7 V ladder fit)
+# device 1-L config (L_CPW1=0; single L_CPW from -7 V fit, bias-independent)
 DEV = {
- 'Rp_200ohm': dict(Rp=200.0, Lcpw=9.4e-12,   Lcpw2=191.7e-12, Lrp=153.7e-12),
- 'Rp_38ohm' : dict(Rp=38.0,  Lcpw=42.4e-12,  Lcpw2=145.8e-12, Lrp=65.6e-12),
- 'Rp_60ohm' : dict(Rp=60.0,  Lcpw=37.5e-12,  Lcpw2=150.9e-12, Lrp=71.8e-12),
- 'Open'     : dict(Rp=np.inf,Lcpw=0.0,       Lcpw2=190.0e-12, Lrp=0.0),
+ 'Rp_200ohm': dict(Rp=200.0, Lcpw=0.0, Lcpw2=200.4e-12, Lrp=153.7e-12),
+ 'Rp_38ohm' : dict(Rp=38.0,  Lcpw=0.0, Lcpw2=158.5e-12, Lrp=65.6e-12),
+ 'Rp_60ohm' : dict(Rp=60.0,  Lcpw=0.0, Lcpw2=172.5e-12, Lrp=71.8e-12),
+ 'Open'     : dict(Rp=np.inf,Lcpw=0.0, Lcpw2=190.0e-12, Lrp=0.0),
 }
 f_plot = np.linspace(0.1e9, 45e9, 4500); w_plot = 2*np.pi*f_plot
 
