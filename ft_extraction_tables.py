@@ -40,18 +40,22 @@ def summ(sub):
                 lo=np.sqrt(1000/(b1 + se)) if b1 + se > 0 else np.nan,
                 hi=np.sqrt(1000/(b1 - se)) if b1 - se > 0 else np.nan)
 
-hdrII = ['Data set', '$N$', 'Free slope', 'Free intercept\n($\\times10^{-3}$)',
-         'Adj. $R^2$', '$f_T$ free\n(GHz)',
-         'Locked intercept\n($\\times10^{-3}$)', '$f_T$ locked\n(GHz)']
+hdrII = ['Data set', '$N$', 'Slope\n(must be 1)',
+         'Intercept $\\times10^{-3}$\n(must be $>0$)',
+         'Adj. $R^2$', '$f_T$\n(GHz)', 'Verdict']
 rowsII = []
-for tag, sub in (('$-7$ V', g[g.V == -7]), ('$-5$ V', g[g.V == -5]),
-                 ('both biases', g)):
+sets = [('$-7$ V', g[g.V == -7]), ('$-5$ V', g[g.V == -5]),
+        ('both biases', g),
+        ('30 $\\mu$m campaign A only',
+         g[(g.V == -7) & g.lab.isin(['200', '33/36', '55', 'WO(A)'])])]
+for tag, sub in sets:
     o = summ(sub)
+    ok = np.isfinite(o['fT'])
     rowsII.append([tag, f"{o['n']}", f"{o['s']:.3f}", f"{o['b']:+.3f}",
                    f"{o['adj']:.3f}",
-                   '—' if not np.isfinite(o['fT']) else f"{o['fT']:.1f}",
-                   f"{o['b1']:+.3f} $\\pm$ {o['se']:.3f}",
-                   f"{o['fT1']:.1f}  ({o['lo']:.1f}–{o['hi']:.1f})"])
+                   f"{o['fT']:.1f}" if ok else '—',
+                   'slope $\\neq$ 1, intercept $<0$' if not ok
+                   else 'slope $\\neq$ 1'])
 
 # ── Table III : fixed model constants ─────────────────────────────────────
 hdrIII = ['Quantity', 'Symbol', 'Value', 'Source']
@@ -90,8 +94,9 @@ draw(fig.add_subplot(gs[0]), hdrI, rowsI,
      'TABLE I.  Measured devices, 2-L ladder $S_{11}$ fit and extracted '
      'RC-limited / measured 3-dB bandwidths')
 draw(fig.add_subplot(gs[1]), hdrII, rowsII,
-     'TABLE II.  $f_T$ extraction from $1/f_{3dB}^{2} = 1/f_{RC}^{2} + '
-     '1/f_{T}^{2}$  (free slope vs. slope locked to unity)', fs=8.2)
+     'TABLE II.  Free-slope fit of $1/f_{3dB}^{2}$ vs. $1/f_{RC}^{2}$. '
+     'The quadrature relation forces unit slope, so the slope is a test of the '
+     '$f_{RC}$ model, not a fit parameter', fs=8.2)
 draw(fig.add_subplot(gs[2]), hdrIII, rowsIII,
      'TABLE III.  Fixed circuit constants and model inputs',
      widths=[0.20, 0.13, 0.30, 0.37], fs=8.0)

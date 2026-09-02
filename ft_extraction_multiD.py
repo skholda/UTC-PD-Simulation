@@ -317,12 +317,13 @@ def panel(ax, col, title):
     xr = np.linspace(0, o['x'].max()*1.12, 50)
     ax.plot(xr, o['slope']*xr + o['icept'], '-', color='k', lw=1.5, zorder=3,
             label='free-slope fit')
-    ax.plot(xr, xr + o['b1'], '--', color='0.45', lw=1.5, zorder=3,
-            label='slope locked to 1')
-    fT1 = f"{o['fT1']:.1f} GHz" if np.isfinite(o['fT1']) else 'not resolvable'
-    ax.annotate(f"free slope = {o['slope']:.3f},  Adj. $R^2$ = {o['adj']:.3f}\n"
-                f"locked-slope intercept = {o['b1']:+.3f}\n"
-                f"$f_T$ = {fT1}",
+    ax.plot(xr, xr, ':', color='0.5', lw=1.4, zorder=2,
+            label='unit slope (required)')
+    fT = (f"$f_T$ = {o['fT']:.1f} GHz" if np.isfinite(o['fT'])
+          else '$f_T$ not extractable')
+    ax.annotate(f"slope = {o['slope']:.3f}   (must be 1)\n"
+                f"intercept = {o['icept']:+.3f}   (must be $>0$)\n"
+                f"Adj. $R^2$ = {o['adj']:.3f}\n{fT}",
                 xy=(0.035, 0.965), xycoords='axes fraction', va='top',
                 ha='left', fontsize=8.5)
     ax.set_title(title, fontsize=10)
