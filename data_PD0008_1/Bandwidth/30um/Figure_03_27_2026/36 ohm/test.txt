@@ -1,0 +1,20 @@
+DEVICE NUMBER: 
+COMMENTS: 
+KEITHLEY VOLTAGE: -7.000000E+00 V
+FREQUENCY SWEEP RUN TIME: 130.14 s
+TOTAL RUN TIME: 324.99 s
+RF Link Loss File (.xlsx): None
+RF Probe Loss File (.s2p): C:/Users/jcchighpower/Desktop/Jeongyong/Bias_tee+cable_cal/S21_cal_bias_tee_cal.s2p
+INITIAL PHOTOCURRENT: -166.85 (mA)
+STARTING WAVELENGTH FOR LASER 3: 1555.6 (nm) : STARTING WAVELENGTH FOR LASER 4: 1555.022 (nm) : DELAY: 3.5 (s) 
+DATE: 03/27/2026
+TIME: 14:53:25
+
+F_BEAT(GHz)	I_PD (mA)	Raw RF POW (dBm)	Total RF Loss (dB)	Probe RF Loss (dB)	Link RF Loss (dB)	Cal RF POW (dBm)	VOA P Actual (dBm)
+0.33      	-1.6685e+02	32.04     	0.11      	0.11      	0.00      	32.15     	2.524     
+0.83      	-1.6687e+02	-23.06    	0.21      	0.21      	0.00      	-22.85    	2.524     
+1.33      	-1.6686e+02	-23.40    	0.34      	0.34      	0.00      	-23.06    	2.523     
+1.83      	-1.6684e+02	-23.51    	0.51      	0.51      	0.00      	-23.00    	2.521     
+2.33      	-1.6684e+02	-23.74    	0.51      	0.51      	0.00      	-23.23    	2.520     
+2.83      	-1.6684e+02	-23.88    	0.41      	0.41      	0.00      	-23.47    	2.518     
+3.25      	-1.6684e+02	-24.03    	0.42      	0.42      	0.00      	-23.61    	2.516     
