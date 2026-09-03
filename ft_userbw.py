@@ -75,6 +75,11 @@ PAIR = [
   'Bias_7V_Iph_1mA_40um_WO_3.xlsx', ''),
  (40, -5, 'WO',    '40V2',   '40um/WO_V2/S11_-5V.s1p',
   'Bias_5V_Iph_1mA_40um_WO_2.xlsx', ''),
+ # the sheets named "40um_38ohm_2" are the 80 ohm V2 device (user confirmed)
+ (40, -7, '80',    '40V2',   '40um/80ohm_V2/S11_-7V.s1p',
+  'Bias_7V_Iph_1mA_40um_38ohm_2.xlsx', 'sheet labelled 38ohm_2'),
+ (40, -5, '80',    '40V2',   '40um/80ohm_V2/S11_-5V.s1p',
+  'Bias_5V_Iph_1mA_40um_38ohm_2.xlsx', 'sheet labelled 38ohm_2'),
 ]
 # excluded, with the reason
 EXCL = [
@@ -83,11 +88,6 @@ EXCL = [
  ('40 um WO, run 2 at -7 V (27.29 GHz)',
   'same-day run 3 gives 10.17 GHz and -5 V gives 10.03 GHz; 27.29 GHz is '
   'also above the modelled f_RC, so run 2 is the outlier'),
- ('40 um 38 ohm, run 2 (02/25)',
-  'the only V2 resistor S11 is the folder "80ohm_V2", which reads 80.3 ohm '
-  'at DC — cannot be reconciled with a 38 ohm label'),
- ('40 um 38 ohm at -5 V (02/25)', 'same conflict, and the sweep stops '
-  'at 16 GHz before -3 dB'),
 ]
 
 BWD = 'data_bw_user'
@@ -103,10 +103,17 @@ def user_f3(sheet):
     c = np.polyfit(f, p, 3); ref = np.polyval(c, 0.0)
     ff = np.linspace(0, f[-1], 40001); pp = np.polyval(c, ff) - ref
     i = np.where(pp <= -3.0)[0]
-    if not len(i) or i[0] == 0:
-        return np.nan
-    j = i[0]
-    return float(np.interp(-3.0, [pp[j], pp[j-1]], [ff[j], ff[j-1]]))
+    if len(i) and i[0] > 0:
+        j = i[0]
+        return float(np.interp(-3.0, [pp[j], pp[j-1]], [ff[j], ff[j-1]])), 'poly3'
+    # the cubic can miss a drop confined to the last points; fall back to the
+    # raw crossing when the measured data itself goes below -3 dB
+    rel = p - ref
+    k = np.where(rel <= -3.0)[0]
+    if len(k) and k[0] > 0:
+        j = k[0]
+        return float(np.interp(-3.0, [rel[j], rel[j-1]], [f[j], f[j-1]])), 'raw'
+    return np.nan, 'none'
 
 fg = np.linspace(1e6, 200e9, 40001); wg = 2*np.pi*fg
 rows = []
@@ -137,10 +144,10 @@ for D, V, lab, camp, s11, sheet, note in PAIR:
     L1, Lm, L2 = unpack(r.x)
     rms = np.sqrt(np.mean(np.abs(S11_model(w, Cpd, Rm, L1, Lm, L2) - Sm)**2))
     fRC = f3dB_of(fg, H_ckt(wg, Cpd, Rm, L1, Lm, L2))/1e9
-    f3 = user_f3(sheet)
+    f3, f3src = user_f3(sheet)
     rows.append(dict(D=D, V=V, lab=lab, camp=camp, Rm=Rm_meas, open=op,
                      Cpd=Cpd*1e15, L1=L1*1e12, Lm=Lm*1e12, L2=L2*1e12,
-                     rms=rms, f_RC=fRC, f3=f3))
+                     rms=rms, f_RC=fRC, f3=f3, f3src=f3src, note=note))
 
 t = pd.DataFrame(rows).sort_values(['D', 'V', 'Rm'])
 t['x'] = 1000/t.f_RC**2
