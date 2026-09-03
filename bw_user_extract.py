@@ -14,19 +14,29 @@ import matplotlib.pyplot as plt
 DIR = 'data_bw_user'
 
 def parse_name(fn):
+    """Names follow ..._<D>um_<R>ohm_<run>.xlsx (the two may be swapped).
+
+    One sheet carries two resistances, Bias_7V_Iph_1mA_120ohm_40um_140ohm_1:
+    the last "<n>ohm" is the one in the canonical slot, and 140 is also what
+    that device's S11 reads at DC (142.5 ohm), so the last match wins. Files
+    with more than one resistance in the name are flagged in `ambiguous`.
+    """
     b = os.path.basename(fn)
     D  = re.search(r'(\d+)\s*um', b, re.I)
-    R  = re.search(r'(\d+)\s*ohm', b, re.I)
+    Rs = re.findall(r'(\d+)\s*ohm', b, re.I)
     V  = re.search(r'Bias[_-]?(-?\d+)\s*V', b, re.I)
     I  = re.search(r'Iph[_-]?(\d+(?:[._]\d+)?)\s*mA', b, re.I)
-    lab = 'WO' if re.search(r'\bWO\b|_WO_', b, re.I) else (R.group(1) if R else '?')
+    # "WO" (without resistor) appears as a token: _WO_, _WO., -WO, ...
+    isWO = re.search(r'(?:^|[_\s.-])WO(?:[_\s.-]|$)', b, re.I) is not None
+    lab = 'WO' if isWO else (Rs[-1] if Rs else '?')
     run = re.search(r'_(\d+)\.xlsx$', b)
     return dict(D=int(D.group(1)) if D else None,
                 lab=lab,
                 run=int(run.group(1)) if run else 1,
-                Rm=(np.inf if lab == 'WO' else float(R.group(1))),
+                Rm=(np.inf if isWO else float(Rs[-1]) if Rs else np.nan),
                 V=-abs(int(V.group(1))) if V else None,
                 Iph=float(I.group(1).replace('_', '.')) if I else None,
+                ambiguous=('/'.join(Rs) if len(Rs) > 1 else ''),
                 file=os.path.basename(fn))
 
 def load(path):
@@ -66,9 +76,15 @@ for path in files:
                      crosses=reached, f=f, p=p, c=ca, ref=ra))
 
 t = pd.DataFrame([{k: v for k, v in r.items() if k not in ('f', 'p', 'c', 'ref')}
-                  for r in recs])
-pd.set_option('display.width', 220)
-print(t.to_string(index=False, float_format=lambda x: f'{x:.2f}'))
+                  for r in recs]).sort_values(['D', 'V', 'Rm', 'run'])
+pd.set_option('display.width', 240)
+print(t.drop(columns=['file']).to_string(index=False,
+      float_format=lambda x: f'{x:.2f}'))
+amb = t[t.ambiguous != '']
+if len(amb):
+    print('\nresistance ambiguous in the file name (last value used):')
+    for _, r in amb.iterrows():
+        print(f"  {r.file}  ->  {r.lab} ohm   (name contains {r.ambiguous})")
 t.to_csv('bw_user_f3dB.csv', index=False)
 
 n = len(recs)
