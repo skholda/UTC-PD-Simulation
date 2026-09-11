@@ -1,0 +1,125 @@
+=== f_tr of H_ph alone vs common scale k (this is the staircase baseline, tau_A = 1.989 ps) ===
+   k     f_tr(GHz)
+  0.50    84.35
+  0.80    52.72
+  1.00    42.17
+  1.20    35.15
+  1.29    32.69
+  1.50    28.12
+  1.75    24.10
+  2.00    21.09
+  2.10    20.08
+  2.20    19.17
+  2.25    18.74
+  2.40    17.57
+  2.50    16.87
+  3.00    14.06
+  previous tau set (tau_A = 3.530 ps, all else equal): f_tr = 32.55 GHz
+
+--- joint fit: 40 um, -7 V (5 devices)  (N_dev = 5, N_pts = 195) ---
+  baseline rms                 1.497 dB
+  shared pole   tau_x =   7.37 ps  (f_x =  21.61 GHz)   rms 0.538   (per-device tau: 0.421)
+  shared pole + per-dev offset tau_x =   7.03 ps   rms 0.480   offsets -0.00 +0.12 -0.08 +0.07 -0.53
+  shared k      k     =  2.301  (f_tr(k) =  18.33 GHz)   rms 0.528   (per-device k:   0.407)
+  shared gauss  f_g   =  34.73 GHz                     rms 0.527   (per-device f_g: 0.407)
+  shared double pole (1+jw tau)^-2  tau =   4.89 ps  rms 0.530
+
+--- joint fit: 40 um, all 7 sheets  (N_dev = 7, N_pts = 257) ---
+  baseline rms                 1.337 dB
+  shared pole   tau_x =   7.14 ps  (f_x =  22.31 GHz)   rms 0.533   (per-device tau: 0.406)
+  shared pole + per-dev offset tau_x =   6.82 ps   rms 0.464   offsets +0.10 +0.31 -0.05 +0.07 -0.14 +0.03 -0.58
+  shared k      k     =  2.264  (f_tr(k) =  18.63 GHz)   rms 0.519   (per-device k:   0.396)
+  shared gauss  f_g   =  35.35 GHz                     rms 0.517   (per-device f_g: 0.396)
+  shared double pole (1+jw tau)^-2  tau =   4.77 ps  rms 0.524
+
+--- joint fit: 40 um V1 only (38/100/140/WO -7 V)  (N_dev = 4, N_pts = 155) ---
+  baseline rms                 1.580 dB
+  shared pole   tau_x =   7.77 ps  (f_x =  20.50 GHz)   rms 0.435   (per-device tau: 0.346)
+  shared pole + per-dev offset tau_x =   7.67 ps   rms 0.376   offsets +0.15 +0.07 +0.17 -0.35
+  shared k      k     =  2.396  (f_tr(k) =  17.60 GHz)   rms 0.380   (per-device k:   0.308)
+  shared gauss  f_g   =  33.06 GHz                     rms 0.369   (per-device f_g: 0.303)
+  shared double pole (1+jw tau)^-2  tau =   5.15 ps  rms 0.401
+
+--- joint fit: 40 um V2 only (80 -7/-5, WO -5)  (N_dev = 3, N_pts = 102) ---
+  baseline rms                 0.844 dB
+  shared pole   tau_x =   5.58 ps  (f_x =  28.53 GHz)   rms 0.498   (per-device tau: 0.483)
+  shared pole + per-dev offset tau_x =   4.54 ps   rms 0.450   offsets -0.23 +0.04 -0.43
+  shared k      k     =  1.903  (f_tr(k) =  22.16 GHz)   rms 0.513   (per-device k:   0.501)
+  shared gauss  f_g   =  44.24 GHz                     rms 0.517   (per-device f_g: 0.507)
+  shared double pole (1+jw tau)^-2  tau =   3.77 ps  rms 0.507
+
+--- joint fit: 30 um, -7 V (8 devices)  (N_dev = 8, N_pts = 475) ---
+  baseline rms                 0.796 dB
+  shared pole   tau_x =   0.00 ps  (f_x = 47348274.82 GHz)   rms 0.796   (per-device tau: 0.781)
+  shared pole + per-dev offset tau_x =   0.00 ps   rms 0.578   offsets +0.70 -0.31 -0.60 +0.75 +0.31 -0.48 -0.48 -0.49
+  shared k      k     =  0.827  (f_tr(k) =  50.98 GHz)   rms 0.753   (per-device k:   0.619)
+  shared gauss  f_g   = 5000.00 GHz                     rms 0.796   (per-device f_g: 0.781)
+  shared double pole (1+jw tau)^-2  tau =   0.00 ps  rms 0.796
+
+--- joint fit: 30 um, -7 and -5 V (12)  (N_dev = 12, N_pts = 724) ---
+  baseline rms                 0.777 dB
+  shared pole   tau_x =   0.00 ps  (f_x = 19172887445124.75 GHz)   rms 0.777   (per-device tau: 0.760)
+  shared pole + per-dev offset tau_x =   0.00 ps   rms 0.598   offsets +0.00 -0.40 -0.52 -0.41 +0.70 -0.31 -0.60 +0.75 +0.31 -0.48 -0.48 -0.49
+  shared k      k     =  0.875  (f_tr(k) =  48.17 GHz)   rms 0.753   (per-device k:   0.649)
+  shared gauss  f_g   = 5000.00 GHz                     rms 0.777   (per-device f_g: 0.761)
+  shared double pole (1+jw tau)^-2  tau =   0.00 ps  rms 0.777
+
+=== per device: double identical pole (1+jw tau2)^-2 ; max |curve difference| between the fitted pole / gauss / k models over the measured band ===
+ D  V lab camp  tau2_ps  rms_2p | rms_pole rms_k rms_g | max|pole-gauss| max|pole-k| max|k-gauss| (dB, over band)  excess@10/15/20GHz (meas-model)
+ 40  -5  80 40V2    4.12  0.374 |  0.367  0.380 0.383 |   0.04          0.04        0.01          -0.99 / -0.46 / +nan
+ 40  -5  WO 40V2    2.92  0.341 |  0.340  0.341 0.341 |   0.01          0.01        0.00          -0.68 / +nan / +nan
+ 40  -7  38 40V1    4.79  0.242 |  0.270  0.225 0.217 |   0.26          0.21        0.05          -0.46 / -1.22 / -3.28
+ 40  -7  80 40V2    3.83  0.652 |  0.633  0.664 0.672 |   0.11          0.09        0.02          -1.06 / -1.14 / -0.62
+ 40  -7 100 40V1    5.05  0.315 |  0.352  0.291 0.278 |   0.34          0.27        0.07          -0.57 / -1.48 / -3.18
+ 40  -7 140 40V1    4.05  0.273 |  0.272  0.274 0.274 |   0.04          0.03        0.01          -0.46 / -1.12 / +nan
+ 40  -7  WO 40V1    5.64  0.405 |  0.434  0.395 0.393 |   0.56          0.43        0.12          -1.24 / -1.51 / -4.17
+ 30  -5  38  Mar    0.00  0.684 |  0.684  0.608 0.684 |   0.00          0.69        0.69          -0.61 / -0.26 / +0.15
+ 30  -5  60  Mar    0.38  0.761 |  0.761  0.761 0.762 |   0.00          0.00        0.01          -0.94 / -0.55 / +0.03
+ 30  -5 200  Mar    1.77  0.577 |  0.575  0.577 0.579 |   0.02          0.01        0.01          -0.83 / -0.53 / -1.13
+ 30  -5  WO  Mar    0.00  0.839 |  0.839  0.839 0.839 |   0.00          0.00        0.00          -1.28 / -0.29 / +0.33
+ 30  -7  38  Jan    0.00  0.940 |  0.940  0.445 0.940 |   0.00          1.78        1.78          +0.26 / +0.69 / +0.77
+ 30  -7  38  Mar    0.39  0.646 |  0.646  0.646 0.646 |   0.00          0.00        0.00          -0.80 / -0.46 / -0.25
+ 30  -7  60  Mar    1.19  0.820 |  0.820  0.820 0.821 |   0.01          0.01        0.01          -1.10 / -0.72 / -0.10
+ 30  -7  76  Jan    0.00  0.985 |  0.985  0.473 0.985 |   0.00          1.89        1.89          +0.39 / +0.82 / +0.81
+ 30  -7 120  Jan    0.00  0.549 |  0.549  0.323 0.549 |   0.00          0.97        0.97          +0.07 / +0.51 / +0.53
+ 30  -7 200  Mar    1.71  0.523 |  0.521  0.523 0.525 |   0.02          0.01        0.01          -0.78 / -0.52 / -0.61
+ 30  -7  WO  Jan    1.80  0.686 |  0.685  0.686 0.686 |   0.01          0.01        0.00          -0.73 / +0.08 / +0.09
+ 30  -7  WO  Mar    0.83  0.862 |  0.862  0.862 0.862 |   0.01          0.00        0.01          -1.20 / -0.50 / +0.16
+
+=== reference shapes: excess attenuation (dB) at 10 / 15 / 20 GHz ===
+  single pole tau = 5 ps: -0.41 / -0.87 / -1.45
+  single pole tau = 6 ps: -0.58 / -1.20 / -1.95
+  single pole tau = 7 ps: -0.77 / -1.57 / -2.49
+  single pole tau = 8 ps: -0.98 / -1.95 / -3.03
+  gaussian f_g = 31 GHz:    -0.90 / -2.03 / -3.62
+  gaussian f_g = 35 GHz:    -0.71 / -1.60 / -2.84
+  gaussian f_g = 40 GHz:    -0.54 / -1.22 / -2.17
+  H_ph(k=2.0) / H_ph(1):     -0.52 / -1.16 / -2.01
+  H_ph(k=2.2) / H_ph(1):     -0.67 / -1.47 / -2.56
+  H_ph(k=2.5) / H_ph(1):     -0.91 / -2.00 / -3.45
+
+=== S11 consequence of the RF-wanted C_PD with H_ph kept (C_ph): rms with L fixed / L refitted (exploratory) ===
+ D  V lab camp   C_CV   C_ph  ratio | s11 rms: base  C_ph,Lfix  C_ph,Lrefit | f_RC base -> with C_ph (L refit)
+ 40  -5  80 40V2   274.6  333.0  1.21 |          0.136    0.168      0.171     |   18.70 ->  16.54
+ 40  -5  WO 40V2   274.6  294.1  1.07 |          0.170    0.183      0.181     |   11.36 ->  10.48
+ 40  -7  38 40V1   227.6  349.8  1.54 |          0.221    0.310      0.299     |   30.72 ->  20.29
+ 40  -7  80 40V2   227.6  286.1  1.26 |          0.132    0.174      0.162     |   21.82 ->  18.96
+ 40  -7 100 40V1   227.6  313.0  1.38 |          0.119    0.191      0.163     |   20.13 ->  14.58
+ 40  -7 140 40V1   227.6  275.8  1.21 |          0.129    0.177      0.169     |   18.77 ->  15.01
+ 40  -7  WO 40V1   227.6  323.6  1.42 |          0.167    0.284      0.256     |   13.78 ->   9.17
+ 30  -5  38  Mar   161.1  146.0  0.91 |          0.063    0.071      0.065     |   37.79 ->  38.73
+ 30  -5  60  Mar   161.1  162.3  1.01 |          0.066    0.066      0.066     |   31.35 ->  31.31
+ 30  -5 200  Mar   161.1  178.0  1.10 |          0.065    0.076      0.062     |   21.04 ->  19.72
+ 30  -5  WO  Mar   161.1  165.0  1.02 |          0.077    0.082      0.081     |   18.52 ->  18.03
+ 30  -7  38  Jan   133.5   90.8  0.68 |          0.063    0.110      0.071     |   37.95 ->  48.17
+ 30  -7  38  Mar   133.5  134.5  1.01 |          0.056    0.056      0.056     |   41.38 ->  41.31
+ 30  -7  60  Mar   133.5  144.3  1.08 |          0.059    0.065      0.058     |   34.91 ->  34.42
+ 30  -7  76  Jan   133.5   97.1  0.73 |          0.066    0.146      0.083     |   32.69 ->  39.55
+ 30  -7 120  Jan   133.5  112.4  0.84 |          0.063    0.106      0.075     |   28.79 ->  32.76
+ 30  -7 200  Mar   133.5  148.5  1.11 |          0.062    0.071      0.054     |   24.63 ->  22.70
+ 30  -7  WO  Jan   133.5  144.9  1.09 |          0.075    0.099      0.087     |   22.25 ->  20.44
+ 30  -7  WO  Mar   133.5  139.6  1.05 |          0.070    0.082      0.078     |   21.96 ->  20.94
+
+=== what a tau_x of the fitted size would be, if it were an RC or a transit term ===
+  tau_x = 6.5 ps: f_x = 24.5 GHz;  C for R = 50 ohm: 130 fF;  C for R = 58.92 ohm (R_L+R_s): 110 fF;  C for R = 8.92 ohm: 729 fF;  quadrature f_T with f_tr = 42.2 GHz: 21.2 GHz;  with f_tr = 32.6: 19.6 GHz
+  tau_x = 7.0 ps: f_x = 22.7 GHz;  C for R = 50 ohm: 140 fF;  C for R = 58.92 ohm (R_L+R_s): 119 fF;  C for R = 8.92 ohm: 785 fF;  quadrature f_T with f_tr = 42.2 GHz: 20.0 GHz;  with f_tr = 32.6: 18.6 GHz

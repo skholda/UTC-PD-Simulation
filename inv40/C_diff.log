@@ -1,0 +1,69 @@
+=== (a) residual signature (meas - baseline model, dB): mean +- sd over sheets, by frequency ===
+  f(GHz)   30um Mar (n)        30um Jan (n)        30um all (n)        40um all (n)
+    2.0   -0.43+-0.14 ( 8)   +0.23+-0.49 ( 4)   -0.21+-0.43 (12)   -0.06+-0.12 ( 7)
+    5.0   -0.70+-0.19 ( 8)   -0.44+-0.62 ( 4)   -0.61+-0.38 (12)   -0.42+-0.28 ( 7)
+    8.0   -0.55+-0.13 ( 8)   +0.07+-0.36 ( 4)   -0.34+-0.37 (12)   -0.35+-0.29 ( 7)
+   10.0   -0.94+-0.23 ( 8)   -0.00+-0.50 ( 4)   -0.63+-0.56 (12)   -0.78+-0.31 ( 7)
+   12.0   -0.98+-0.40 ( 8)   +0.40+-0.25 ( 4)   -0.52+-0.76 (12)   -1.04+-0.46 ( 7)
+   14.0   -0.89+-0.30 ( 8)   +0.11+-0.53 ( 4)   -0.55+-0.61 (12)   -1.03+-0.36 ( 7)
+   15.0   -0.48+-0.15 ( 8)   +0.52+-0.32 ( 4)   -0.14+-0.53 (12)   -1.16+-0.38 ( 6)
+   16.0   -0.63+-0.33 ( 8)   +0.57+-0.19 ( 4)   -0.23+-0.66 (12)   -1.61+-0.65 ( 5)
+   17.0   -1.12+-0.23 ( 8)   +0.19+-0.41 ( 4)   -0.68+-0.71 (12)   -2.31+-0.20 ( 4)
+   18.0   -0.77+-0.27 ( 8)   +0.28+-0.66 ( 4)   -0.42+-0.66 (12)   -2.16+-0.60 ( 4)
+   20.0   -0.18+-0.48 ( 8)   +0.55+-0.33 ( 4)   +0.07+-0.55 (12)   -2.81+-1.53 ( 4)
+   22.0   +0.55+-0.37 ( 8)   +0.87+-0.29 ( 3)   +0.64+-0.37 (11)   -4.06+-nan ( 1)
+   25.0   -0.17+-0.21 ( 8)   +0.94+-0.27 ( 3)   +0.13+-0.56 (11)         -        
+   30.0   +0.71+-0.39 ( 5)   +1.64+-0.09 ( 2)   +0.98+-0.55 ( 7)         -        
+   35.0   +0.01+-0.34 ( 2)   +0.78+-nan ( 1)   +0.27+-0.50 ( 3)         -        
+
+=== (b) 40 um residual after subtracting the 30 um signature; refits on the corrected curve ===
+  signature = 30 um March mean (8 sheets, -7/-5 V);  [all12] uses all 12 30 um sheets
+ D  V lab camp  | corrected residual: rms  @10  @15  @20  end | pole tau_x(ps) f_x rms | gauss f_g rms | k  rms | [all12] tau_x  f_g  k
+ 40  -5  80 40V2  |   0.37  -0.04 +0.07 +nan -0.04 |    0.63  252.3 0.369 |  355.4 0.369 | 1.02 0.369 |    3.71   62.2 1.52
+ 40  -5  WO 40V2  |   0.57  +0.26 +nan +nan +0.86 |    0.00  160702805.7 0.575 |    inf 0.575 | 0.00 0.477 |    0.00    inf 0.34
+ 40  -7  38 40V1  |   1.10  +0.55 -0.72 -3.23 -3.03 |    5.38   29.6 0.713 |   43.6 0.680 | 1.91 0.687 |    6.25   38.7 2.10
+ 40  -7  80 40V2  |   0.53  -0.12 -0.62 -0.56 -0.48 |    3.75   42.5 0.298 |   62.8 0.301 | 1.51 0.300 |    4.77   50.9 1.73
+ 40  -7 100 40V1  |   1.27  +0.42 -0.95 -3.16 -3.98 |    5.89   27.0 0.776 |   40.4 0.727 | 2.03 0.738 |    6.69   36.5 2.20
+ 40  -7 140 40V1  |   0.38  +0.55 -0.64 +nan -1.11 |    0.00  1259647.6 0.380 |    inf 0.380 | 0.89 0.378 |    3.33   68.0 1.44
+ 40  -7  WO 40V1  |   1.93  -0.25 -1.03 -3.99 -5.10 |    7.64   20.8 0.801 |   33.4 0.661 | 2.38 0.690 |    8.26   31.7 2.49
+  [mar] 40 um corrected: tau_x mean 3.33 sd 3.13 (min 0.00 max 7.64);  f_g mean 107.1 sd 139.2;  k mean 1.39 sd 0.82
+  [all12] 40 um corrected: tau_x mean 4.72 sd 2.71 (min 0.00 max 8.26);  f_g mean 48.0 sd 14.8;  k mean 1.69 sd 0.71
+  [mar] 40 um -7 V only: tau_x mean 4.53 sd 2.89;  f_g mean inf;  k mean 1.74
+
+  null test: each 30 um sheet corrected by the leave-one-out signature of the other 30 um sheets (same campaign), pole refit:
+    30 um  -5 V  38 Mar: corrected rms 0.44  tau_x  0.00 ps   (@10 +0.38, @15 +0.29, @20 +0.24)
+    30 um  -5 V  60 Mar: corrected rms 0.24  tau_x  0.00 ps   (@10 +0.03, @15 -0.08, @20 +0.10)
+    30 um  -5 V 200 Mar: corrected rms 0.43  tau_x  1.67 ps   (@10 +0.13, @15 -0.06, @20 -1.08)
+    30 um  -5 V  WO Mar: corrected rms 0.32  tau_x  0.00 ps   (@10 -0.38, @15 +0.26, @20 +0.43)
+    30 um  -7 V  38 Jan: corrected rms 0.25  tau_x  0.00 ps   (@10 +0.35, @15 +0.29, @20 +0.25)
+    30 um  -7 V  38 Mar: corrected rms 0.32  tau_x  1.29 ps   (@10 +0.24, @15 +0.06, @20 -0.09)
+    30 um  -7 V  60 Mar: corrected rms 0.29  tau_x  1.51 ps   (@10 -0.15, @15 -0.18, @20 -0.09)
+    30 um  -7 V  76 Jan: corrected rms 0.43  tau_x  0.00 ps   (@10 +0.53, @15 +0.50, @20 +0.35)
+    30 um  -7 V 120 Jan: corrected rms 0.29  tau_x  1.63 ps   (@10 +0.11, @15 +0.05, @20 -0.06)
+    30 um  -7 V 200 Mar: corrected rms 0.42  tau_x  1.80 ps   (@10 +0.21, @15 -0.00, @20 -0.63)
+    30 um  -7 V  WO Jan: corrected rms 0.82  tau_x  4.49 ps   (@10 -0.96, @15 -0.59, @20 -0.65)
+    30 um  -7 V  WO Mar: corrected rms 0.36  tau_x  0.83 ps   (@10 -0.27, @15 +0.06, @20 +0.21)
+
+=== (c) de-trended step across the 16.0->16.5 GHz boundary (line fit 13-16.1 GHz vs 16.4-19.5 GHz, evaluated at 16.25 GHz) ===
+ D  V lab camp  n_lo n_hi   step_cal(dB)  step_raw(dB)  step_loss(dB)   sheet
+ 40  -5  80 40V2    6    0       +nan          +nan          +nan       Bias_5V_Iph_1mA_40um_38ohm_2.xlsx
+ 40  -5  WO 40V2    4    0       +nan          +nan          +nan       Bias_5V_Iph_1mA_40um_WO_2.xlsx
+ 40  -7  38 40V1    6    6      -0.14         -0.09         -0.05       Bias_7V_Iph_1mA_40um_38ohm_1.xlsx
+ 40  -7  80 40V2    7    6      -1.45         -0.86         -0.60       Bias_7V_Iph_1mA_40um_38ohm_2.xlsx
+ 40  -7 100 40V1    6    6      -0.66         -0.64         -0.02       Bias_7V_Iph_1mA_40um_100ohm_1.xlsx
+ 40  -7 140 40V1    5    0       +nan          +nan          +nan       Bias_7V_Iph_1mA_120ohm_40um_140ohm_1.xlsx
+ 40  -7  WO 40V1    7    7      -0.81         -0.77         -0.04       Bias_7V_Iph_1mA_40um_WO_3.xlsx
+ 30  -5  38  Mar    6    6      -0.96         -0.23         -0.73       Bias_5V_Iph_1mA_30um_38ohm_1.xlsx
+ 30  -5  60  Mar    5    6      -1.57         -0.75         -0.82       Bias_5V_Iph_1mA_30um_60ohm_1.xlsx
+ 30  -5 200  Mar    6   12      -1.04         -0.99         -0.05       Bias_5V_Iph_1mA_30um_200ohm_1.xlsx
+ 30  -5  WO  Mar    7    6      -2.07         -1.21         -0.86       Bias_-5V_Iph_1mA_30GHz.xlsx
+ 30  -7  38  Jan    6    5      -0.49         -0.44         -0.05       Bias_7V_Iph_1mA_38ohm_30um_1.xlsx
+ 30  -7  38  Mar    6    6      -1.10         -0.22         -0.87       Bias_7V_Iph_1mA_30um_38ohm_2.xlsx
+ 30  -7  60  Mar    6    6      -1.28         -0.70         -0.08       Bias_7V_Iph_1mA_30um_60ohm_2.xlsx
+ 30  -7  76  Jan    6    6      -0.66         -0.60         -0.06       Bias_7V_Iph_1mA_30um_76ohm_1.xlsx
+ 30  -7 120  Jan    5    6      -0.91         -0.89         -0.03       Bias_7V_Iph_1mA_30um_120ohm_1.xlsx
+ 30  -7 200  Mar    6   11      -1.00         -0.94         -0.05       Bias_7V_Iph_1mA_30um_200ohm_1.xlsx
+ 30  -7  WO  Jan    6    6      -1.14         -1.11         -0.03       Bias_7V_Iph_1mA_30um_WO_1.xlsx
+ 30  -7  WO  Mar    6    6      -1.85         -1.22         -0.62       Bias_7V_Iph_1mA_30GHz_30um_WO_2.xlsx
+  40 um: step_cal mean -0.77 sd 0.54 (n 4, min -1.45 max -0.14)
+  30 um: step_cal mean -1.17 sd 0.46 (n 12, min -2.07 max -0.49)
